@@ -18,4 +18,4 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/me").get(verifyJWT, getCurrentUser);
 
-export default router;
+export default router
