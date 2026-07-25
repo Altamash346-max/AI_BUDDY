@@ -113,7 +113,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     let decodedToken;
-    try {
+    try {  //checked error therefore in try and catch
         decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (error) {
         throw new ApiError(401, "Invalid or expired refresh token");
