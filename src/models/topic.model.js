@@ -34,7 +34,7 @@ const topicSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['locked', 'unlocked', 'completed'],
+        enum: ['locked', 'current', 'completed'],
     },
     resources: [resourceSchema]
 })
