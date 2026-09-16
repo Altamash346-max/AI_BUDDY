@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { generateJsonFromPrompt } from "../utils/geminiClient.js";
+import { generateJsonFromPrompt } from "../utils/geminiclient.js"; // FIX: was "geminiClient.js" (wrong case)
 import { Roadmap } from "../models/roadmap.model.js";
 import { Topic } from "../models/topic.model.js";
 
@@ -39,7 +39,10 @@ const generateRoadmap = asyncHandler(async (req, res) => {
         throw new ApiError(400, "subject, goal, level, and timeAvailable are all required");
     }
 
-    const validGoals = ["Placement", "College Exam", "Hackathon", "Research", "Freelancing"];
+    // FIX: was ["Placement", "College Exam", ...] — "College Exam" (singular) never matched
+    // the model's enum value "College Exams" (plural), so a valid request from the model's
+    // own schema was always rejected here first.
+    const validGoals = ["Placement", "College Exams", "Hackathon", "Research", "Freelancing"];
     const validLevels = ["Beginner", "Intermediate", "Advanced"];
 
     if (!validGoals.includes(goal)) {
