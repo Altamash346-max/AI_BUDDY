@@ -12,7 +12,6 @@ app.use(cors({
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
-
 // Routes
 // FIX: was "./routes/user.routes.js" (lowercase) but the real file is "User.routes.js"
 // (capital U) — works on Windows, breaks on Linux/Mac. Fixed to match the real filename.

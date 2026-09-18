@@ -1,17 +1,13 @@
 import { Router } from "express";
-import {
-    markTopicComplete,
-    getProgressForRoadmap,
-    getMyProgressStats
-} from "../controllers/progress.controller.js";
+import { generateQuiz, getQuizForTopic, submitQuiz } from "../controllers/quiz.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.use(verifyJWT);
 
-router.route("/complete").post(markTopicComplete);
-router.route("/roadmap/:roadmapId").get(getProgressForRoadmap);
-router.route("/stats").get(getMyProgressStats);
+router.route("/:topicId/generate").post(generateQuiz);
+router.route("/:topicId").get(getQuizForTopic);
+router.route("/:topicId/submit").post(submitQuiz);
 
 export default router;
