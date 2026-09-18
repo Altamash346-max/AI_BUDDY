@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
         minlength: 6,
+    },
+    // FIX: this field was missing. Without it, `user.refreshToken = ...; user.save()`
+    // in the controller silently drops the value — Mongoose ignores fields not in the schema.
+    refreshToken: {
+        type: String
     }
 })
 
@@ -63,4 +68,3 @@ userSchema.methods.generateRefreshToken = function () {
 }
 
 export const User = mongoose.model('User', userSchema);
-
