@@ -70,6 +70,14 @@ app.use((err, _req, res, _next) => {
         });
     }
 
+    // Malformed ObjectId in a URL param (e.g. /api/roadmap/abc) is a client error, not a crash
+    if (err?.name === "CastError") {
+        return res.status(400).json({
+            success: false,
+            message: `Invalid ${err.path || "id"}`
+        });
+    }
+
     console.error(err);
     return res.status(500).json({
         success: false,

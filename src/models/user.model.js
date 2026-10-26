@@ -3,12 +3,12 @@ import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
 
 const userSchema = new mongoose.Schema({
+    // FIX: name was unique + lowercase, so two students with the same name could not
+    // both sign up (E11000 → 500) and names displayed as "rahul sharma". Email is the identity.
     name: {
         type: String,
         required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
+        trim: true
     },
     email: {
         type: String,

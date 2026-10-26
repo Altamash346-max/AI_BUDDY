@@ -57,7 +57,7 @@ const markTopicComplete = asyncHandler(async (req, res) => {
             streak,
             completedAt: new Date()
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     topic.status = "completed";

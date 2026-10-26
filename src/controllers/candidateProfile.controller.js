@@ -58,7 +58,7 @@ const uploadResume = asyncHandler(async (req, res) => {
             parsedEducation: parsed.education || [],
             updatedAt: new Date()
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     return res
