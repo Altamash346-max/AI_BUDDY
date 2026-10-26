@@ -8,6 +8,67 @@ import { Quiz } from "../models/quiz.model.js";
 
 const WEAK_SCORE = 60;
 
+const YOUTUBE_HOST = /(^|\.)(youtube\.com|youtu\.be)$/i;
+
+// Gemini invents YouTube video IDs (only ~1 in 6 resolved in our link check), so any
+// video or YouTube resource becomes a YouTube search for that title, which always works.
+// Non-video URLs are kept if they parse as http(s); otherwise they fall back to a web search.
+const cleanResources = (resources, subject, topicTitle) =>
+    (Array.isArray(resources) ? resources : []).map((r) => {
+        const title = (r?.title || topicTitle || "").toString().trim();
+        let parsed = null;
+        try {
+            parsed = new URL(r?.url);
+        } catch {
+            parsed = null;
+        }
+        const isHttp = parsed && /^https?:$/.test(parsed.protocol);
+        const query = encodeURIComponent(`${subject} ${title}`.trim());
+
+        if (r?.type === "video" || (isHttp && YOUTUBE_HOST.test(parsed.hostname))) {
+            return { ...r, title, type: "video", url: `https://www.youtube.com/results?search_query=${query}` };
+        }
+        if (!isHttp) {
+            return { ...r, title, url: `https://www.google.com/search?q=${query}` };
+        }
+        return { ...r, title };
+    });
+
+const LINK_TIMEOUT_MS = 4000;
+
+// Gemini also invents article/course paths (e.g. realpython.com/<made-up-slug>). Check each
+// non-search link once, in parallel, and swap only clearly dead ones (404/410/DNS failure)
+// for a Google search. 403/429/5xx are kept: those sites exist but block bots or hiccup.
+const isDeadLink = async (url) => {
+    const opts = { redirect: "follow", headers: { "User-Agent": "Mozilla/5.0 PlacementPrep link check" } };
+    try {
+        let r = await fetch(url, { ...opts, method: "HEAD", signal: AbortSignal.timeout(LINK_TIMEOUT_MS) });
+        if (r.status === 405 || r.status === 501) {
+            r = await fetch(url, { ...opts, method: "GET", signal: AbortSignal.timeout(LINK_TIMEOUT_MS) });
+        }
+        return r.status === 404 || r.status === 410;
+    } catch (err) {
+        // Timeouts are not proof a page is gone; DNS/connection failures are
+        return err?.name !== "TimeoutError" && err?.name !== "AbortError";
+    }
+};
+
+const verifyResources = async (topicDocs, subject) => {
+    const checks = [];
+    for (const t of topicDocs) {
+        for (const r of t.resources) {
+            if (/google\.com\/search|youtube\.com\/results/.test(r.url)) continue;
+            checks.push(
+                isDeadLink(r.url).then((dead) => {
+                    if (dead) r.url = `https://www.google.com/search?q=${encodeURIComponent(`${subject} ${r.title}`)}`;
+                })
+            );
+        }
+    }
+    await Promise.all(checks);
+    return topicDocs;
+};
+
 const describeTopic = (t, i) =>
     `${i + 1}. ${t.title}${t.quizScore != null ? ` (quiz ${t.quizScore}%)` : ""}`;
 
@@ -119,10 +180,10 @@ const generateRoadmap = asyncHandler(async (req, res) => {
         title: t.title,
         order: t.order ?? index + 1,
         status: index === 0 ? "current" : "locked",
-        resources: Array.isArray(t.resources) ? t.resources : []
+        resources: cleanResources(t.resources, subject, t.title)
     }));
 
-    const topics = await Topic.insertMany(topicDocs);
+    const topics = await Topic.insertMany(await verifyResources(topicDocs, subject));
 
     return res
         .status(201)
@@ -154,7 +215,11 @@ const getRoadmapWithTopics = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Roadmap not found");
     }
 
-    const topics = await Topic.find({ roadmapId: roadmap._id }).sort({ order: 1 });
+    // Cleaned on read too, so roadmaps saved before link cleaning also get working links
+    const topics = (await Topic.find({ roadmapId: roadmap._id }).sort({ order: 1 }).lean()).map((t) => ({
+        ...t,
+        resources: cleanResources(t.resources, roadmap.subject, t.title)
+    }));
 
     return res
         .status(200)
@@ -222,13 +287,16 @@ const adaptRoadmap = asyncHandler(async (req, res) => {
     ]);
 
     await Topic.insertMany(
-        aiResponse.topics.slice(0, 10).map((t, i) => ({
-            roadmapId: roadmap._id,
-            title: t.title,
-            order: completed.length + i + 1,
-            status: i === 0 ? "current" : "locked",
-            resources: Array.isArray(t.resources) ? t.resources : [],
-        }))
+        await verifyResources(
+            aiResponse.topics.slice(0, 10).map((t, i) => ({
+                roadmapId: roadmap._id,
+                title: t.title,
+                order: completed.length + i + 1,
+                status: i === 0 ? "current" : "locked",
+                resources: cleanResources(t.resources, roadmap.subject, t.title),
+            })),
+            roadmap.subject
+        )
     );
 
     roadmap.adaptations.push({ instruction, summary });
