@@ -2,13 +2,18 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { User, Upload, Zap, Code, Briefcase, BookOpen, FileText, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { User, Upload, Zap, Code, Briefcase, BookOpen, FileText, X, CheckCircle, AlertCircle, Trash2 } from 'lucide-react'
+import { startJob, clearJob, useJob } from '../utils/jobs'
+
+const UPLOAD_JOB = 'resume-upload'
 
 export default function ProfilePage() {
   const { user } = useAuth()
+  const uploadJob = useJob(UPLOAD_JOB)
+  const uploading = uploadJob?.status === 'running'
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [resumeFile, setResumeFile] = useState(null)
   const [linkedinFile, setLinkedinFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
@@ -30,27 +35,42 @@ export default function ProfilePage() {
     if (file) setResumeFile(file)
   }
 
-  const handleUpload = async (e) => {
+  // A resume, a LinkedIn PDF, or both. Uploading again replaces the current profile.
+  const handleUpload = (e) => {
     e.preventDefault()
-    if (!resumeFile) return toast.error('Please select your resume file')
+    if (!resumeFile && !linkedinFile) return toast.error('Select your resume or LinkedIn PDF')
 
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('resume', resumeFile)
-      if (linkedinFile) formData.append('linkedin', linkedinFile)
+    const formData = new FormData()
+    if (resumeFile) formData.append('resume', resumeFile)
+    if (linkedinFile) formData.append('linkedin', linkedinFile)
 
-      const res = await api.post('/interview/profile/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      setProfile(res.data?.data)
-      toast.success('🎉 Resume parsed & profile updated!')
+    startJob(UPLOAD_JOB, () => api.post('/interview/profile/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(res => res.data?.data), { doneMessage: '🎉 Profile updated from your documents!' })
+  }
+
+  useEffect(() => {
+    if (uploadJob?.status === 'done') {
+      setProfile(uploadJob.result)
       setResumeFile(null)
       setLinkedinFile(null)
+      clearJob(UPLOAD_JOB)
+    } else if (uploadJob?.status === 'error') {
+      clearJob(UPLOAD_JOB)
+    }
+  }, [uploadJob])
+
+  const handleDelete = async () => {
+    if (!window.confirm('Delete your uploaded resume and the skills extracted from it?')) return
+    setDeleting(true)
+    try {
+      await api.delete('/interview/profile')
+      setProfile(null)
+      toast.success('Resume deleted')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to parse resume. Try a different file.')
+      toast.error(err.response?.data?.message || 'Could not delete the resume')
     } finally {
-      setUploading(false)
+      setDeleting(false)
     }
   }
 
@@ -93,6 +113,17 @@ export default function ProfilePage() {
                 </span>
               )}
             </div>
+            {profile && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                style={{ marginTop: 14, color: 'var(--accent-rose)' }}
+                onClick={handleDelete}
+                disabled={deleting || uploading}
+              >
+                <Trash2 size={13} /> {deleting ? 'Deleting…' : 'Delete uploaded resume'}
+              </button>
+            )}
           </div>
 
           {/* Profile Data */}
@@ -191,8 +222,10 @@ export default function ProfilePage() {
                 <Upload size={18} color="var(--accent-purple)" />
               </div>
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 700 }}>Upload Resume</h2>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>AI will automatically extract your skills & experience</p>
+                <h2 style={{ fontSize: 18, fontWeight: 700 }}>{profile ? 'Replace Resume' : 'Upload Resume'}</h2>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  {profile ? 'A new upload replaces your current profile' : 'AI will automatically extract your skills & experience'}
+                </p>
               </div>
             </div>
 
@@ -216,7 +249,7 @@ export default function ProfilePage() {
                 <input
                   ref={resumeRef}
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.docx,.txt"
                   style={{ display: 'none' }}
                   onChange={e => setResumeFile(e.target.files[0])}
                 />
@@ -241,14 +274,14 @@ export default function ProfilePage() {
                     <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>
                       Drop your resume here or <span style={{ color: 'var(--accent-purple)' }}>browse</span>
                     </p>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Supports PDF, DOC, DOCX, TXT</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Supports PDF, DOCX, TXT</p>
                   </>
                 )}
               </div>
 
               {/* LinkedIn (optional) */}
               <div className="form-group">
-                <label className="form-label">LinkedIn PDF (optional)</label>
+                <label className="form-label">LinkedIn PDF (optional, or use it on its own)</label>
                 <div
                   onClick={() => linkedinRef.current?.click()}
                   style={{
@@ -281,7 +314,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={uploading || !resumeFile}>
+              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={uploading || (!resumeFile && !linkedinFile)}>
                 {uploading ? (
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div className="ai-orbs" style={{ gap: 5 }}>
@@ -305,7 +338,7 @@ export default function ProfilePage() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
-                { step: '1', text: 'Upload your resume (PDF, DOCX, or TXT)' },
+                { step: '1', text: 'Upload your resume (PDF, DOCX or TXT) and/or your LinkedIn "Save to PDF" export' },
                 { step: '2', text: 'Gemini AI extracts your skills, experience & projects' },
                 { step: '3', text: 'Your profile is used to personalize interview questions' },
                 { step: '4', text: 'Get better, more relevant AI responses across all features' },

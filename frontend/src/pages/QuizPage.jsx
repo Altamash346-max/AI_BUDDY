@@ -2,17 +2,22 @@ import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Brain, Zap, CheckCircle, XCircle, RotateCcw, Trophy, ChevronRight } from 'lucide-react'
+import { startJob, clearJob, useJob } from '../utils/jobs'
+
+const QUIZ_JOB = 'quiz-generate'
 
 export default function QuizPage() {
+  const quizJob = useJob(QUIZ_JOB)
+  const loading = quizJob?.status === 'running'
   const [roadmaps, setRoadmaps] = useState([])
   const [topics, setTopics] = useState([])
-  const [selectedRoadmap, setSelectedRoadmap] = useState('')
-  const [selectedTopic, setSelectedTopic] = useState('')
+  // Coming back mid-generation (or after it finished elsewhere) restores the chosen topic
+  const [selectedRoadmap, setSelectedRoadmap] = useState(() => quizJob?.meta?.roadmapId || '')
+  const [selectedTopic, setSelectedTopic] = useState(() => quizJob?.meta?.topicId || '')
   const [quiz, setQuiz] = useState(null)
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
-  const [loading, setLoading] = useState(false)
   const [loadingTopics, setLoadingTopics] = useState(false)
   const [results, setResults] = useState(null) // server-graded results
 
@@ -28,26 +33,33 @@ export default function QuizPage() {
         const data = r.data?.data
         const tps = data?.topics || []
         setTopics(tps)
-        setSelectedTopic('')
+        setSelectedTopic(cur => (tps.some(t => t._id === cur) ? cur : ''))
       })
       .catch(() => setTopics([]))
       .finally(() => setLoadingTopics(false))
   }, [selectedRoadmap])
 
-  const handleGenerate = async () => {
+  // Every generate asks the server for a fresh, different quiz. The request runs in the
+  // job store, so switching pages mid-generation doesn't lose it.
+  const handleGenerate = () => {
     if (!selectedTopic) return toast.error('Please select a topic')
-    setLoading(true)
-    setQuiz(null); setAnswers({}); setSubmitted(false); setScore(0)
-    try {
-      const res = await api.post(`/quiz/${selectedTopic}/generate`)
-      setQuiz(res.data?.data)
-      toast.success('Quiz generated! 🧠')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to generate quiz')
-    } finally {
-      setLoading(false)
-    }
+    setQuiz(null); setAnswers({}); setSubmitted(false); setScore(0); setResults(null)
+    startJob(QUIZ_JOB, () => api.post(`/quiz/${selectedTopic}/generate`).then(res => res.data?.data), {
+      meta: { roadmapId: selectedRoadmap, topicId: selectedTopic },
+      doneMessage: '🧠 Your quiz is ready!',
+    })
   }
+
+  useEffect(() => {
+    if (quizJob?.status === 'done') {
+      setSelectedRoadmap(quizJob.meta.roadmapId)
+      setSelectedTopic(quizJob.meta.topicId)
+      setQuiz(quizJob.result)
+      clearJob(QUIZ_JOB)
+    } else if (quizJob?.status === 'error') {
+      clearJob(QUIZ_JOB)
+    }
+  }, [quizJob])
 
   const handleAnswer = (qi, optIdx) => {
     if (submitted) return
@@ -67,10 +79,6 @@ export default function QuizPage() {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to submit quiz')
     }
-  }
-
-  const handleReset = () => {
-    setQuiz(null); setAnswers({}); setSubmitted(false); setScore(0); setResults(null)
   }
 
   const questions = quiz?.questions || []
@@ -164,8 +172,8 @@ export default function QuizPage() {
                 You scored <strong>{score} out of {total}</strong> ({pct}%)
               </p>
             </div>
-            <button className="btn btn-secondary" onClick={handleReset}>
-              <RotateCcw size={16} /> Try Again
+            <button className="btn btn-secondary" onClick={handleGenerate} disabled={loading}>
+              <RotateCcw size={16} /> {loading ? 'Generating…' : 'New Quiz'}
             </button>
           </div>
         </div>

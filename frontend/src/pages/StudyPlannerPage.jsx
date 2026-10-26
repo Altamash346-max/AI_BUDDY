@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 import { BookOpen, Zap, Calendar, Target, CheckSquare } from 'lucide-react'
 
 export default function StudyPlannerPage() {
@@ -82,7 +83,7 @@ export default function StudyPlannerPage() {
               <div style={{ padding: '12px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 'var(--radius-md)' }}>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                   📍 You need to create a roadmap first.{' '}
-                  <a href="/roadmap" style={{ color: 'var(--accent-purple)', fontWeight: 600 }}>Generate one →</a>
+                  <Link to="/roadmap" style={{ color: 'var(--accent-purple)', fontWeight: 600 }}>Generate one →</Link>
                 </p>
               </div>
             )}

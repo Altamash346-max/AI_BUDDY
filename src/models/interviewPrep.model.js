@@ -1,13 +1,15 @@
 import mongoose from "mongoose";
 
+// Each item is { question, answer }. Mixed so preps saved before expected answers
+// were added (plain question strings) still load.
 const generatedQuestionsSchema = new mongoose.Schema({
-    technical: [{ type: String }],
+    technical: [mongoose.Schema.Types.Mixed],
 
-    projectBased: [{ type: String }],
+    projectBased: [mongoose.Schema.Types.Mixed],
 
-    behavioral: [{ type: String }],
+    behavioral: [mongoose.Schema.Types.Mixed],
 
-    culturalFit: [{ type: String }]
+    culturalFit: [mongoose.Schema.Types.Mixed]
 })
 
 const interviewPrepSchema = new mongoose.Schema({

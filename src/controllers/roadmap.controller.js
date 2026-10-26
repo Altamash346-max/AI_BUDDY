@@ -34,7 +34,7 @@ const cleanResources = (resources, subject, topicTitle) =>
         return { ...r, title };
     });
 
-const LINK_TIMEOUT_MS = 4000;
+const LINK_TIMEOUT_MS = 3000;
 
 // Gemini also invents article/course paths (e.g. realpython.com/<made-up-slug>). Check each
 // non-search link once, in parallel, and swap only clearly dead ones (404/410/DNS failure)
@@ -100,18 +100,25 @@ Rewrite ONLY the remaining part of the roadmap:
 - For each weak topic, add one short revision or practice topic for it early in the list.
 - Follow the student's request where it is reasonable for their goal.
 - Keep between 3 and 10 remaining topics in a sensible learning order.
-- Give each topic 2-3 well-known resources (official docs, popular courses or videos).
+${RESOURCE_RULES}
 
 Return ONLY valid JSON in exactly this shape:
 {
   "summary": "one or two sentences telling the student what changed and why",
-  "topics": [
-    { "title": "string", "resources": [ { "title": "string", "url": "string", "type": "video" } ] }
-  ]
+  "topics": [ { "title": "string", ${RESOURCE_SHAPE} } ]
 }
 
 Valid values for "type" are: video, article, documentation, course, practice, project.`;
 };
+
+// Generation time grows with the length of the AI's answer, and invented video URLs were
+// thrown away anyway (cleanResources turns videos into YouTube searches), so the model
+// writes no video URL at all: about 40% fewer output tokens per roadmap.
+const RESOURCE_RULES = `For each topic give exactly 2 resources:
+1. a video: "title" = a short YouTube search phrase, "url" = "" (left empty)
+2. a reading resource (official documentation or a well-known tutorial site) with its real URL; prefer stable main pages over deep links`;
+
+const RESOURCE_SHAPE = `"resources": [ { "title": "string", "type": "video", "url": "" }, { "title": "string", "type": "documentation", "url": "https://..." } ]`;
 
 const buildRoadmapPrompt = ({ subject, goal, level, timeAvailable }) => {
     return `You are an expert learning mentor. Create a personalized learning roadmap.
@@ -121,20 +128,11 @@ Goal: ${goal}
 Current level: ${level}
 Time available: ${timeAvailable}
 
-Generate 8-10 topics in logical learning order. For each topic include 2-3 well-known resources (official docs, popular courses or videos). Keep titles short.
+Generate 8-10 topics in logical learning order. Keep titles short.
+${RESOURCE_RULES}
 
 Return ONLY valid JSON in exactly this shape, no extra text:
-{
-  "topics": [
-    {
-      "title": "string",
-      "order": 1,
-      "resources": [
-        { "title": "string", "url": "string", "type": "video" }
-      ]
-    }
-  ]
-}
+{ "topics": [ { "title": "string", ${RESOURCE_SHAPE} } ] }
 
 Valid values for "type" are: video, article, documentation, course, practice, project.`;
 };
@@ -178,7 +176,7 @@ const generateRoadmap = asyncHandler(async (req, res) => {
     const topicDocs = aiResponse.topics.map((t, index) => ({
         roadmapId: roadmap._id,
         title: t.title,
-        order: t.order ?? index + 1,
+        order: index + 1,
         status: index === 0 ? "current" : "locked",
         resources: cleanResources(t.resources, subject, t.title)
     }));

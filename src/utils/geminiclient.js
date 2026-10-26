@@ -31,9 +31,9 @@ const cleanJsonText = (text) => {
  *   the budget (re-prompting would just get truncated again).
  */
 export const generateJsonFromPrompt = async (prompt, options = {}) => {
-    const strictPrompt = `${prompt}
-
-IMPORTANT: Your ENTIRE response must be ONLY valid JSON. No explanation, no markdown, no code fences, no text before or after the JSON.`;
+    // `prompt` is a string, or an array of parts (e.g. a PDF as inlineData plus text)
+    const strictNote = "IMPORTANT: Your ENTIRE response must be ONLY valid JSON. No explanation, no markdown, no code fences, no text before or after the JSON.";
+    const strictPrompt = Array.isArray(prompt) ? [...prompt, { text: strictNote }] : `${prompt}\n\n${strictNote}`;
 
     // Newer flash models spend part of this budget on internal "thinking",
     // so it must be well above the size of the JSON we expect back.
@@ -47,7 +47,7 @@ IMPORTANT: Your ENTIRE response must be ONLY valid JSON. No explanation, no mark
                     model: modelName,
                     generationConfig: {
                         responseMimeType: "application/json",
-                        temperature: 0.3,
+                        temperature: options.temperature ?? 0.3,
                         maxOutputTokens: maxTokens,
                     },
                 },
@@ -140,5 +140,5 @@ export const generateChatReply = async (history, systemInstruction) => {
 /**
  * Variant for small JSON outputs (quizzes, short lists) with a shorter timeout.
  */
-export const generateJsonFast = (prompt) =>
-    generateJsonFromPrompt(prompt, { maxOutputTokens: 4096, timeoutMs: 30000 });
+export const generateJsonFast = (prompt, options = {}) =>
+    generateJsonFromPrompt(prompt, { maxOutputTokens: 4096, timeoutMs: 30000, ...options });

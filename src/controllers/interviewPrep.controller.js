@@ -32,14 +32,36 @@ Generate:
 - 4 behavioral questions
 - 4 questions reflecting ${company}'s likely culture/values and hiring focus
 
+For EVERY question also write the expected answer: what a strong candidate would say, in 2-4 clear
+sentences. Technical answers state the correct concept with a short example. Project answers use the
+candidate's own projects and tech above. Behavioral and culture answers follow the STAR method
+(Situation, Task, Action, Result) in brief.
+
 Return ONLY valid JSON in exactly this shape, no extra text:
 {
-  "technical": ["string"],
-  "projectBased": ["string"],
-  "behavioral": ["string"],
-  "culturalFit": ["string"]
+  "technical": [{ "question": "string", "answer": "string" }],
+  "projectBased": [{ "question": "string", "answer": "string" }],
+  "behavioral": [{ "question": "string", "answer": "string" }],
+  "culturalFit": [{ "question": "string", "answer": "string" }]
 }`;
 };
+
+const QUESTION_KEYS = ["technical", "projectBased", "behavioral", "culturalFit"];
+
+// Accepts { question, answer } items or bare strings; drops anything without a question
+const normalizeQuestions = (raw) =>
+    Object.fromEntries(
+        QUESTION_KEYS.map((k) => [
+            k,
+            (Array.isArray(raw?.[k]) ? raw[k] : [])
+                .map((item) =>
+                    typeof item === "string"
+                        ? { question: item, answer: "" }
+                        : { question: String(item?.question || "").trim(), answer: String(item?.answer || "").trim() }
+                )
+                .filter((item) => item.question)
+        ])
+    );
 
 // POST /api/interview/generate  { company, role, jobDescription? }
 const generateInterviewPrep = asyncHandler(async (req, res) => {
@@ -55,11 +77,9 @@ const generateInterviewPrep = asyncHandler(async (req, res) => {
     }
 
     const prompt = buildInterviewPrompt({ profile, company, role, jobDescription });
-    const generatedQuestions = await generateJsonFromPrompt(prompt);
+    const generatedQuestions = normalizeQuestions(await generateJsonFromPrompt(prompt));
 
-    const requiredKeys = ["technical", "projectBased", "behavioral", "culturalFit"];
-    const isValid = requiredKeys.every((k) => Array.isArray(generatedQuestions?.[k]));
-    if (!isValid) {
+    if (QUESTION_KEYS.every((k) => generatedQuestions[k].length === 0)) {
         throw new ApiError(502, "AI response did not contain a valid question set");
     }
 

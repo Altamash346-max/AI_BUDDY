@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { Map, Plus, ChevronDown, ChevronUp, ExternalLink, Trash2, Zap, BookOpen, Video, FileText, Code, Layers, MessageCircle, WandSparkles, TriangleAlert, History } from 'lucide-react'
+import { Map, Plus, ChevronDown, ChevronUp, ExternalLink, Trash2, Zap, BookOpen, Video, FileText, Code, Layers, MessageCircle, WandSparkles, TriangleAlert, History, Lock } from 'lucide-react'
 import { askBuddy } from '../components/ChatWidget'
+import { startJob, clearJob, useJob } from '../utils/jobs'
+
+const GENERATE_JOB = 'roadmap-generate'
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 const GOALS = ['Placement', 'College Exams', 'Hackathon', 'Research', 'Freelancing']
@@ -19,7 +22,7 @@ const RESOURCE_ICONS = {
   project: { icon: Code, color: '#ec4899', bg: 'rgba(236,72,153,0.12)' },
 }
 
-function TopicCard({ topic, index, onMarkDone }) {
+function TopicCard({ topic, index, canMark, onMarkDone }) {
   const [open, setOpen] = useState(false)
   const isDone = topic.status === 'completed'
 
@@ -43,12 +46,17 @@ function TopicCard({ topic, index, onMarkDone }) {
             onClick={(e) => { e.stopPropagation(); askBuddy({ topicId: topic._id, topicTitle: topic.title }) }}
             aria-label={`Ask AI Buddy about ${topic.title}`}
           ><MessageCircle size={13} /> Ask</button>
-          {!isDone && (
+          {!isDone && canMark && (
             <button
               className="btn btn-sm"
               style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.25)', fontSize: 11 }}
               onClick={(e) => { e.stopPropagation(); onMarkDone(topic._id) }}
             >Mark Done</button>
+          )}
+          {!isDone && !canMark && (
+            <span className="badge" style={{ fontSize: 11, color: 'var(--text-muted)' }} title="Finish the earlier topics first">
+              <Lock size={11} /> Locked
+            </span>
           )}
           {open ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
         </div>
@@ -76,12 +84,14 @@ function TopicCard({ topic, index, onMarkDone }) {
 }
 
 export default function RoadmapPage() {
-  const [form, setForm] = useState({ subject: '', goal: GOALS[0], level: LEVELS[0], timeAvailable: TIME_OPTIONS[0] })
-  const [loading, setLoading] = useState(false)
+  const genJob = useJob(GENERATE_JOB)
+  const loading = genJob?.status === 'running'
+  // Coming back while a roadmap is still generating: show the form with its spinner again
+  const [form, setForm] = useState(() => genJob?.meta || { subject: '', goal: GOALS[0], level: LEVELS[0], timeAvailable: TIME_OPTIONS[0] })
   const [roadmaps, setRoadmaps] = useState([])
   const [activeRoadmap, setActiveRoadmap] = useState(null)
   const [topics, setTopics] = useState([])
-  const [view, setView] = useState('list') // 'list' | 'generate' | 'detail'
+  const [view, setView] = useState(() => (genJob?.status === 'running' ? 'generate' : 'list')) // 'list' | 'generate' | 'detail'
   const [fetchingTopics, setFetchingTopics] = useState(false)
   const [adaptOpen, setAdaptOpen] = useState(false)
   const [adaptText, setAdaptText] = useState('')
@@ -96,22 +106,27 @@ export default function RoadmapPage() {
     } catch { /* silent */ }
   }
 
-  const handleGenerate = async (e) => {
+  // The request runs in the job store, so leaving this page doesn't lose it
+  const handleGenerate = (e) => {
     e.preventDefault()
-    setLoading(true)
-    try {
-      const res = await api.post('/roadmap/generate', form)
-      const roadmap = res.data?.data?.roadmap
-      toast.success('🗺️ Roadmap generated successfully!')
-      await fetchRoadmaps()
+    startJob(GENERATE_JOB, () => api.post('/roadmap/generate', form).then(res => res.data?.data), {
+      meta: form,
+      doneMessage: '🗺️ Your roadmap is ready!',
+    })
+  }
+
+  // When the job finishes (now, or while the student was on another page), show the result
+  useEffect(() => {
+    if (genJob?.status === 'done') {
+      const roadmap = genJob.result?.roadmap
+      clearJob(GENERATE_JOB)
+      fetchRoadmaps()
       if (roadmap) openRoadmap(roadmap)
       else setView('list')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to generate roadmap')
-    } finally {
-      setLoading(false)
+    } else if (genJob?.status === 'error') {
+      clearJob(GENERATE_JOB)
     }
-  }
+  }, [genJob])
 
   const openRoadmap = async (roadmap) => {
     setActiveRoadmap(roadmap)
@@ -149,9 +164,14 @@ export default function RoadmapPage() {
   const handleMarkDone = async (topicId) => {
     try {
       // Backend: POST /progress/complete with { topicId } in body
-      await api.post('/progress/complete', { topicId })
-      // Topic model uses status field, not a boolean 'completed'
-      setTopics(ts => ts.map(t => t._id === topicId ? { ...t, status: 'completed' } : t))
+      const res = await api.post('/progress/complete', { topicId })
+      const nextId = res.data?.data?.nextTopic?._id
+      // Topic model uses status field, not a boolean 'completed'; the next topic unlocks
+      setTopics(ts => ts.map(t =>
+        t._id === topicId ? { ...t, status: 'completed' }
+          : t._id === nextId && t.status === 'locked' ? { ...t, status: 'current' }
+          : t
+      ))
       toast.success('Topic marked as completed! 🎉')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update progress')
@@ -173,6 +193,8 @@ export default function RoadmapPage() {
   const weakTopics = topics.filter(t => t.quizScore != null && t.quizScore < WEAK_SCORE)
   const lastAdaptation = activeRoadmap?.adaptations?.at(-1)
   const completedCount = topics.filter(t => t.status === 'completed').length
+  // Only the first unfinished topic can be marked done; the rest stay locked until then
+  const nextTopicIndex = topics.findIndex(t => t.status !== 'completed')
   const progressPct = topics.length > 0 ? Math.round((completedCount / topics.length) * 100) : 0
 
   return (
@@ -388,7 +410,7 @@ export default function RoadmapPage() {
             <div className="empty-state"><div className="empty-icon">📚</div><h3 className="empty-title">No Topics Found</h3></div>
           ) : (
             topics.map((topic, i) => (
-              <TopicCard key={topic._id} topic={topic} index={i} onMarkDone={handleMarkDone} />
+              <TopicCard key={topic._id} topic={topic} index={i} canMark={i === nextTopicIndex} onMarkDone={handleMarkDone} />
             ))
           )}
         </div>

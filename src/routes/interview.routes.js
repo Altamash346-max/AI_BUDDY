@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { uploadResume, getMyProfile } from "../controllers/candidateProfile.controller.js";
+import { uploadResume, getMyProfile, deleteMyProfile } from "../controllers/candidateProfile.controller.js";
 import {
     generateInterviewPrep,
     getMyInterviewPreps,
@@ -20,7 +20,7 @@ router.route("/profile/upload").post(
     ]),
     uploadResume
 );
-router.route("/profile").get(getMyProfile);
+router.route("/profile").get(getMyProfile).delete(deleteMyProfile);
 
 // Interview question generation
 // NOTE: these literal routes are registered before "/:id" on purpose —

@@ -46,6 +46,20 @@ const markTopicComplete = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You do not have access to this topic");
     }
 
+    if (topic.status === "completed") {
+        throw new ApiError(400, "This topic is already completed");
+    }
+
+    // Topics are learned in order: every earlier topic must be completed first
+    const pendingEarlier = await Topic.findOne({
+        roadmapId: topic.roadmapId,
+        order: { $lt: topic.order },
+        status: { $ne: "completed" }
+    }).sort({ order: 1 });
+    if (pendingEarlier) {
+        throw new ApiError(400, `Finish "${pendingEarlier.title}" first. Topics unlock in order.`);
+    }
+
     const streak = await calculateStreak(req.user._id, topicId);
 
     const progress = await Progress.findOneAndUpdate(
@@ -63,11 +77,12 @@ const markTopicComplete = asyncHandler(async (req, res) => {
     topic.status = "completed";
     await topic.save();
 
-    // Unlock the next topic in order, if it's still locked
+    // Unlock the next unfinished topic in order, if it's still locked
     const nextTopic = await Topic.findOne({
         roadmapId: topic.roadmapId,
-        order: topic.order + 1
-    });
+        order: { $gt: topic.order },
+        status: { $ne: "completed" }
+    }).sort({ order: 1 });
 
     if (nextTopic && nextTopic.status === "locked") {
         nextTopic.status = "current";

@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { MessageSquare, Zap, User, Code, Heart, Brain } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { startJob, clearJob, useJob } from '../utils/jobs'
+
+const INTERVIEW_JOB = 'interview-generate'
+
+// Items are { question, answer }; preps saved before answers existed hold plain strings
+const toItem = (q, category) => (typeof q === 'string' ? { question: q, category } : { ...q, category })
 
 const CATEGORY_CONFIG = {
   technical: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', icon: Code, label: 'Technical' },
@@ -27,10 +34,10 @@ function QuestionCard({ question, index }) {
             </span>
           </div>
           <p className="question-text">{question.question}</p>
-          {question.hint && (
+          {question.answer && (
             <details style={{ marginTop: 10 }}>
-              <summary style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>💡 Show Hint</summary>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8, padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', lineHeight: 1.6 }}>{question.hint}</p>
+              <summary style={{ fontSize: 12, color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>💡 Show expected answer</summary>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8, padding: '8px 12px', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', lineHeight: 1.6 }}>{question.answer}</p>
             </details>
           )}
         </div>
@@ -40,10 +47,11 @@ function QuestionCard({ question, index }) {
 }
 
 export default function InterviewPage() {
+  const job = useJob(INTERVIEW_JOB)
+  const loading = job?.status === 'running'
   const [profile, setProfile] = useState(null)
-  const [form, setForm] = useState({ company: '', role: '', jobDescription: '' })
+  const [form, setForm] = useState(() => job?.meta || { company: '', role: '', jobDescription: '' })
   const [questions, setQuestions] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
   const [history, setHistory] = useState([])
 
@@ -52,29 +60,33 @@ export default function InterviewPage() {
     api.get('/interview/me').then(r => setHistory(r.data?.data || [])).catch(() => {})
   }, [])
 
-  const handleGenerate = async (e) => {
+  // Runs in the job store so switching pages mid-generation doesn't lose it
+  const handleGenerate = (e) => {
     e.preventDefault()
     if (!form.company || !form.role) return toast.error('Company and role are required')
-    setLoading(true)
     setQuestions(null)
-    try {
-      const res = await api.post('/interview/generate', form)
-      // Backend returns the saved InterviewPrep doc; questions are in res.data.data.generatedQuestions
-      setQuestions(res.data?.data?.generatedQuestions || res.data?.data)
-      toast.success('💼 Interview questions generated!')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to generate questions')
-    } finally {
-      setLoading(false)
-    }
+    startJob(INTERVIEW_JOB, () => api.post('/interview/generate', form).then(res => res.data?.data), {
+      meta: form,
+      doneMessage: '💼 Interview questions are ready!',
+    })
   }
+
+  useEffect(() => {
+    if (job?.status === 'done') {
+      // Backend returns the saved InterviewPrep doc; questions are in generatedQuestions
+      setQuestions(job.result?.generatedQuestions || job.result)
+      clearJob(INTERVIEW_JOB)
+    } else if (job?.status === 'error') {
+      clearJob(INTERVIEW_JOB)
+    }
+  }, [job])
 
   const allQs = questions
     ? [
-        ...(questions.technical || []).map(q => ({ question: q, category: 'technical' })),
-        ...(questions.projectBased || []).map(q => ({ question: q, category: 'projectBased' })),
-        ...(questions.behavioral || []).map(q => ({ question: q, category: 'behavioral' })),
-        ...(questions.culturalFit || []).map(q => ({ question: q, category: 'culturalFit' })),
+        ...(questions.technical || []).map(q => toItem(q, 'technical')),
+        ...(questions.projectBased || []).map(q => toItem(q, 'projectBased')),
+        ...(questions.behavioral || []).map(q => toItem(q, 'behavioral')),
+        ...(questions.culturalFit || []).map(q => toItem(q, 'culturalFit')),
       ]
     : []
 
@@ -95,7 +107,7 @@ export default function InterviewPage() {
           <span>⚠️</span>
           <p style={{ fontSize: 13, color: '#f59e0b' }}>
             Add your profile and skills for more personalized interview questions.{' '}
-            <a href="/profile" style={{ fontWeight: 600, textDecoration: 'underline' }}>Set up profile →</a>
+            <Link to="/profile" style={{ fontWeight: 600, textDecoration: 'underline' }}>Set up profile →</Link>
           </p>
         </div>
       )}

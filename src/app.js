@@ -70,6 +70,12 @@ app.use((err, _req, res, _next) => {
         });
     }
 
+    // Upload problems (file too large, too many files) are the user's to fix, not a crash
+    if (err?.name === "MulterError") {
+        const message = err.code === "LIMIT_FILE_SIZE" ? "File is too large (max 5 MB)" : err.message;
+        return res.status(400).json({ success: false, message });
+    }
+
     // Malformed ObjectId in a URL param (e.g. /api/roadmap/abc) is a client error, not a crash
     if (err?.name === "CastError") {
         return res.status(400).json({

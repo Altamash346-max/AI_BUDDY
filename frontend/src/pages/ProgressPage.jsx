@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { TrendingUp, CheckCircle, Circle, Map, Trophy } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { TrendingUp, CheckCircle, Circle, Map, Trophy, Lock } from 'lucide-react'
 import { StatusDonut, RoadmapBars } from '../components/ProgressCharts'
 
 export default function ProgressPage() {
@@ -35,25 +36,25 @@ export default function ProgressPage() {
     finally { setLoading(false) }
   }
 
-  const handleMark = async (topicId, nowCompleted) => {
+  // Backend only supports completing a topic (no undo), and only the next one in order
+  const handleMark = async (topicId) => {
     try {
-      // Backend only supports POST /progress/complete (mark done — no undo)
-      if (nowCompleted) {
-        await api.post('/progress/complete', { topicId })
-      }
+      const res = await api.post('/progress/complete', { topicId })
+      const nextId = res.data?.data?.nextTopic?._id
       // Topic model uses status field ('completed' | 'current' | 'locked')
       setTopics(ts => ts.map(t =>
-        t._id === topicId
-          ? { ...t, status: nowCompleted ? 'completed' : 'current' }
+        t._id === topicId ? { ...t, status: 'completed' }
+          : t._id === nextId && t.status === 'locked' ? { ...t, status: 'current' }
           : t
       ))
-      toast.success(nowCompleted ? 'Topic completed! 🎉' : 'Topic marked incomplete')
+      toast.success('Topic completed! 🎉')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update')
     }
   }
 
   const completed = topics.filter(t => t.status === 'completed').length
+  const nextTopicIndex = topics.findIndex(t => t.status !== 'completed')
   const total = topics.length
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
@@ -74,7 +75,7 @@ export default function ProgressPage() {
           <div className="empty-icon">📈</div>
           <h3 className="empty-title">No Roadmaps to Track</h3>
           <p className="empty-desc">Create a roadmap first to start tracking your progress</p>
-          <a href="/roadmap" className="btn btn-primary btn-lg"><Map size={16} /> Go to Roadmaps</a>
+          <Link to="/roadmap" className="btn btn-primary btn-lg"><Map size={16} /> Go to Roadmaps</Link>
         </div>
       ) : (
         <>
@@ -153,23 +154,29 @@ export default function ProgressPage() {
                   <div className="ai-loader"><div className="ai-orbs"><div className="ai-orb" /><div className="ai-orb" /><div className="ai-orb" /></div></div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {topics.map((topic, i) => (
-                      <div
-                        key={topic._id}
-                        className="card"
-                        style={{ padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer', borderColor: topic.status === 'completed' ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)' }}
-                        onClick={() => handleMark(topic._id, topic.status !== 'completed')}
-                      >
-                        {topic.status === 'completed'
-                          ? <CheckCircle size={20} color="#10b981" />
-                          : <Circle size={20} color="var(--text-muted)" />
-                        }
-                        <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: topic.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: topic.status === 'completed' ? 'line-through' : 'none' }}>
-                          {topic.title}
-                        </span>
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>#{i + 1}</span>
-                      </div>
-                    ))}
+                    {topics.map((topic, i) => {
+                      const isDone = topic.status === 'completed'
+                      const canMark = i === nextTopicIndex
+                      return (
+                        <div
+                          key={topic._id}
+                          className="card"
+                          style={{ padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', cursor: canMark ? 'pointer' : 'default', borderColor: isDone ? 'rgba(16,185,129,0.3)' : canMark ? 'var(--border-accent)' : 'var(--border-subtle)', opacity: !isDone && !canMark ? 0.6 : 1 }}
+                          onClick={canMark ? () => handleMark(topic._id) : undefined}
+                          title={canMark ? 'Mark this topic done' : isDone ? 'Completed' : 'Finish the earlier topics first'}
+                        >
+                          {isDone
+                            ? <CheckCircle size={20} color="#10b981" />
+                            : canMark ? <Circle size={20} color="var(--accent-purple)" />
+                            : <Lock size={18} color="var(--text-muted)" />
+                          }
+                          <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: isDone ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isDone ? 'line-through' : 'none' }}>
+                            {topic.title}
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{canMark ? 'Click to mark done' : `#${i + 1}`}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </>
