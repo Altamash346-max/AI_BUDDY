@@ -5,8 +5,9 @@ import { MessageSquare, Zap, User, Code, Heart, Brain } from 'lucide-react'
 
 const CATEGORY_CONFIG = {
   technical: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', icon: Code, label: 'Technical' },
+  projectBased: { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)', icon: Brain, label: 'Project-Based' },
   behavioral: { color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: Heart, label: 'Behavioral' },
-  systemDesign: { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)', icon: Brain, label: 'System Design' },
+  culturalFit: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: MessageSquare, label: 'Cultural Fit' },
   default: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: MessageSquare, label: 'General' },
 }
 
@@ -58,7 +59,8 @@ export default function InterviewPage() {
     setQuestions(null)
     try {
       const res = await api.post('/interview/generate', form)
-      setQuestions(res.data?.data)
+      // Backend returns the saved InterviewPrep doc; questions are in res.data.data.generatedQuestions
+      setQuestions(res.data?.data?.generatedQuestions || res.data?.data)
       toast.success('💼 Interview questions generated!')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to generate questions')
@@ -69,9 +71,10 @@ export default function InterviewPage() {
 
   const allQs = questions
     ? [
-        ...(questions.technicalQuestions || []).map(q => ({ ...q, category: 'technical' })),
-        ...(questions.behavioralQuestions || []).map(q => ({ ...q, category: 'behavioral' })),
-        ...(questions.systemDesignQuestions || []).map(q => ({ ...q, category: 'systemDesign' })),
+        ...(questions.technical || []).map(q => ({ question: q, category: 'technical' })),
+        ...(questions.projectBased || []).map(q => ({ question: q, category: 'projectBased' })),
+        ...(questions.behavioral || []).map(q => ({ question: q, category: 'behavioral' })),
+        ...(questions.culturalFit || []).map(q => ({ question: q, category: 'culturalFit' })),
       ]
     : []
 
@@ -158,11 +161,12 @@ export default function InterviewPage() {
 
           {/* Stats */}
           {questions && (
-            <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+            <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
               {[
-                { label: 'Technical', count: questions.technicalQuestions?.length || 0, color: '#8b5cf6' },
-                { label: 'Behavioral', count: questions.behavioralQuestions?.length || 0, color: '#10b981' },
-                { label: 'System Design', count: questions.systemDesignQuestions?.length || 0, color: '#06b6d4' },
+                { label: 'Technical', count: questions.technical?.length || 0, color: '#8b5cf6' },
+                { label: 'Project-Based', count: questions.projectBased?.length || 0, color: '#06b6d4' },
+                { label: 'Behavioral', count: questions.behavioral?.length || 0, color: '#10b981' },
+                { label: 'Cultural Fit', count: questions.culturalFit?.length || 0, color: '#f59e0b' },
               ].map(({ label, count, color }) => (
                 <div key={label} style={{ padding: '10px', background: 'var(--bg-glass)', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-subtle)' }}>
                   <div style={{ fontSize: 22, fontWeight: 800, color }}>{count}</div>
@@ -180,9 +184,10 @@ export default function InterviewPage() {
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                 {[
                   { key: 'all', label: `All (${allQs.length})` },
-                  { key: 'technical', label: `Technical (${questions.technicalQuestions?.length || 0})` },
-                  { key: 'behavioral', label: `Behavioral (${questions.behavioralQuestions?.length || 0})` },
-                  { key: 'systemDesign', label: `System Design (${questions.systemDesignQuestions?.length || 0})` },
+                  { key: 'technical', label: `Technical (${questions.technical?.length || 0})` },
+                  { key: 'projectBased', label: `Project-Based (${questions.projectBased?.length || 0})` },
+                  { key: 'behavioral', label: `Behavioral (${questions.behavioral?.length || 0})` },
+                  { key: 'culturalFit', label: `Cultural Fit (${questions.culturalFit?.length || 0})` },
                 ].map(({ key, label }) => (
                   <button
                     key={key}

@@ -4,6 +4,53 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { generateJsonFromPrompt } from "../utils/geminiclient.js"; // FIX: was "geminiClient.js" (wrong case)
 import { Roadmap } from "../models/roadmap.model.js";
 import { Topic } from "../models/topic.model.js";
+import { Quiz } from "../models/quiz.model.js";
+
+const WEAK_SCORE = 60;
+
+const describeTopic = (t, i) =>
+    `${i + 1}. ${t.title}${t.quizScore != null ? ` (quiz ${t.quizScore}%)` : ""}`;
+
+const buildAdaptPrompt = (roadmap, completed, remaining, instruction) => {
+    const weak = [...completed, ...remaining].filter(
+        (t) => t.quizScore != null && t.quizScore < WEAK_SCORE
+    );
+
+    return `You are adjusting a student's personalized learning roadmap based on their progress.
+
+Subject: ${roadmap.subject}
+Goal: ${roadmap.goal}
+Current level: ${roadmap.level}
+Time available: ${roadmap.timeAvailable}
+
+Completed topics (already learned — keep them, do not repeat them):
+${completed.length ? completed.map(describeTopic).join("\n") : "none yet"}
+
+Topics still remaining in the current plan:
+${remaining.length ? remaining.map(describeTopic).join("\n") : "none"}
+
+Weak topics (quiz score below ${WEAK_SCORE}%):
+${weak.length ? weak.map((t) => `- ${t.title} (${t.quizScore}%)`).join("\n") : "none"}
+
+Student's request: ${instruction ? `"${instruction}"` : "none — adapt based on progress and quiz scores only"}
+
+Rewrite ONLY the remaining part of the roadmap:
+- Never include a completed topic again as-is.
+- For each weak topic, add one short revision or practice topic for it early in the list.
+- Follow the student's request where it is reasonable for their goal.
+- Keep between 3 and 10 remaining topics in a sensible learning order.
+- Give each topic 2-3 well-known resources (official docs, popular courses or videos).
+
+Return ONLY valid JSON in exactly this shape:
+{
+  "summary": "one or two sentences telling the student what changed and why",
+  "topics": [
+    { "title": "string", "resources": [ { "title": "string", "url": "string", "type": "video" } ] }
+  ]
+}
+
+Valid values for "type" are: video, article, documentation, course, practice, project.`;
+};
 
 const buildRoadmapPrompt = ({ subject, goal, level, timeAvailable }) => {
     return `You are an expert learning mentor. Create a personalized learning roadmap.
@@ -13,7 +60,7 @@ Goal: ${goal}
 Current level: ${level}
 Time available: ${timeAvailable}
 
-Generate 8-12 topics in logical learning order. For each topic include 2-4 curated resources.
+Generate 8-10 topics in logical learning order. For each topic include 2-3 well-known resources (official docs, popular courses or videos). Keep titles short.
 
 Return ONLY valid JSON in exactly this shape, no extra text:
 {
@@ -114,4 +161,84 @@ const getRoadmapWithTopics = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, { roadmap, topics }, "Roadmap fetched successfully"));
 });
 
-export { generateRoadmap, getMyRoadmaps, getRoadmapWithTopics };
+// DELETE /api/roadmap/:roadmapId
+const deleteRoadmap = asyncHandler(async (req, res) => {
+    const { roadmapId } = req.params;
+
+    const roadmap = await Roadmap.findOne({ _id: roadmapId, userId: req.user._id });
+    if (!roadmap) {
+        throw new ApiError(404, "Roadmap not found");
+    }
+
+    // Cascade delete all topics belonging to this roadmap
+    await Topic.deleteMany({ roadmapId: roadmap._id });
+    await Roadmap.deleteOne({ _id: roadmap._id });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Roadmap deleted successfully"));
+});
+
+// POST /api/roadmap/:roadmapId/adapt  { instruction?: string }
+// Keeps completed topics and asks Gemini to rebuild the rest from progress,
+// quiz scores and the student's optional request.
+const adaptRoadmap = asyncHandler(async (req, res) => {
+    const { roadmapId } = req.params;
+    const instruction = (req.body?.instruction || "").toString().trim();
+
+    if (instruction.length > 300) {
+        throw new ApiError(400, "instruction must be 300 characters or fewer");
+    }
+
+    const roadmap = await Roadmap.findOne({ _id: roadmapId, userId: req.user._id });
+    if (!roadmap) {
+        throw new ApiError(404, "Roadmap not found");
+    }
+
+    const allTopics = await Topic.find({ roadmapId }).sort({ order: 1 });
+    const completed = allTopics.filter((t) => t.status === "completed");
+    const remaining = allTopics.filter((t) => t.status !== "completed");
+
+    const aiResponse = await generateJsonFromPrompt(
+        buildAdaptPrompt(roadmap, completed, remaining, instruction)
+    );
+
+    if (!Array.isArray(aiResponse?.topics) || aiResponse.topics.length === 0) {
+        throw new ApiError(502, "AI response did not contain a valid topics list");
+    }
+
+    const summary = (aiResponse.summary || "Roadmap updated based on your progress.").toString().slice(0, 500);
+
+    // Renumber completed topics 1..n so the new ones follow them in order
+    await Promise.all(
+        completed.map((t, i) => Topic.updateOne({ _id: t._id }, { order: i + 1 }))
+    );
+
+    // Replace the unfinished part of the plan (and quizzes tied to it)
+    const removedIds = remaining.map((t) => t._id);
+    await Promise.all([
+        Topic.deleteMany({ _id: { $in: removedIds } }),
+        Quiz.deleteMany({ topicId: { $in: removedIds } }),
+    ]);
+
+    await Topic.insertMany(
+        aiResponse.topics.slice(0, 10).map((t, i) => ({
+            roadmapId: roadmap._id,
+            title: t.title,
+            order: completed.length + i + 1,
+            status: i === 0 ? "current" : "locked",
+            resources: Array.isArray(t.resources) ? t.resources : [],
+        }))
+    );
+
+    roadmap.adaptations.push({ instruction, summary });
+    await roadmap.save();
+
+    const topics = await Topic.find({ roadmapId }).sort({ order: 1 });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { roadmap, topics, summary }, "Roadmap adapted successfully"));
+});
+
+export { generateRoadmap, getMyRoadmaps, getRoadmapWithTopics, deleteRoadmap, adaptRoadmap };

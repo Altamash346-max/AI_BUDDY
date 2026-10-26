@@ -2,18 +2,25 @@ import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { TrendingUp, CheckCircle, Circle, Map, Trophy } from 'lucide-react'
+import { StatusDonut, RoadmapBars } from '../components/ProgressCharts'
 
 export default function ProgressPage() {
   const [roadmaps, setRoadmaps] = useState([])
   const [selectedRoadmap, setSelectedRoadmap] = useState(null)
   const [topics, setTopics] = useState([])
   const [loading, setLoading] = useState(false)
+  const [roadmapStats, setRoadmapStats] = useState([])
 
   useEffect(() => {
     api.get('/roadmap/me').then(r => {
       const rms = r.data?.data || []
       setRoadmaps(rms)
       if (rms.length > 0) loadTopics(rms[0])
+      Promise.all(rms.map(rm =>
+        api.get(`/progress/roadmap/${rm._id}`)
+          .then(res => ({ id: rm._id, name: rm.subject, completed: res.data?.data?.completedCount || 0, total: res.data?.data?.totalCount || 0 }))
+          .catch(() => ({ id: rm._id, name: rm.subject, completed: 0, total: 0 }))
+      )).then(setRoadmapStats)
     }).catch(() => {})
   }, [])
 
@@ -28,23 +35,32 @@ export default function ProgressPage() {
     finally { setLoading(false) }
   }
 
-  const handleMark = async (topicId, completed) => {
+  const handleMark = async (topicId, nowCompleted) => {
     try {
-      // Backend only has POST /progress/complete (mark done)
-      // Toggle by just tracking local state if not completed
-      if (completed) {
+      // Backend only supports POST /progress/complete (mark done — no undo)
+      if (nowCompleted) {
         await api.post('/progress/complete', { topicId })
       }
-      setTopics(ts => ts.map(t => t._id === topicId ? { ...t, completed } : t))
-      toast.success(completed ? 'Topic completed! 🎉' : 'Topic marked incomplete')
+      // Topic model uses status field ('completed' | 'current' | 'locked')
+      setTopics(ts => ts.map(t =>
+        t._id === topicId
+          ? { ...t, status: nowCompleted ? 'completed' : 'current' }
+          : t
+      ))
+      toast.success(nowCompleted ? 'Topic completed! 🎉' : 'Topic marked incomplete')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update')
     }
   }
 
-  const completed = topics.filter(t => t.completed).length
+  const completed = topics.filter(t => t.status === 'completed').length
   const total = topics.length
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+
+  // Keep the selected roadmap's bar in sync with local topic updates
+  const barData = roadmapStats.map(d =>
+    d.id === selectedRoadmap?._id && !loading ? { ...d, completed, total } : d
+  )
 
   return (
     <div className="page-container fade-in">
@@ -61,6 +77,17 @@ export default function ProgressPage() {
           <a href="/roadmap" className="btn btn-primary btn-lg"><Map size={16} /> Go to Roadmaps</a>
         </div>
       ) : (
+        <>
+        {/* Charts */}
+        <div className="grid-2" style={{ gap: 24, marginBottom: 24 }}>
+          <StatusDonut topics={topics} />
+          <RoadmapBars
+            data={barData}
+            selectedId={selectedRoadmap?._id}
+            onSelect={id => { const rm = roadmaps.find(r => r._id === id); if (rm) loadTopics(rm) }}
+          />
+        </div>
+
         <div className="grid-2" style={{ gap: 24, alignItems: 'flex-start' }}>
           {/* Roadmap Selector */}
           <div>
@@ -130,14 +157,14 @@ export default function ProgressPage() {
                       <div
                         key={topic._id}
                         className="card"
-                        style={{ padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer', borderColor: topic.completed ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)' }}
-                        onClick={() => handleMark(topic._id, !topic.completed)}
+                        style={{ padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer', borderColor: topic.status === 'completed' ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)' }}
+                        onClick={() => handleMark(topic._id, topic.status !== 'completed')}
                       >
-                        {topic.completed
+                        {topic.status === 'completed'
                           ? <CheckCircle size={20} color="#10b981" />
                           : <Circle size={20} color="var(--text-muted)" />
                         }
-                        <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: topic.completed ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: topic.completed ? 'line-through' : 'none' }}>
+                        <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: topic.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: topic.status === 'completed' ? 'line-through' : 'none' }}>
                           {topic.title}
                         </span>
                         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>#{i + 1}</span>
@@ -149,6 +176,7 @@ export default function ProgressPage() {
             )}
           </div>
         </div>
+        </>
       )}
     </div>
   )

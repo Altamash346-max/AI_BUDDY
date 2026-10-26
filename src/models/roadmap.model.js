@@ -23,8 +23,14 @@ const roadmapSchema = new mongoose.Schema({
     },
     timeAvailable: {
         type: String,
-        required: true,   
-    }
+        required: true,
+    },
+    // History of AI adjustments made to the remaining topics
+    adaptations: [{
+        instruction: { type: String, default: "" },
+        summary: { type: String, required: true },
+        at: { type: Date, default: Date.now }
+    }]
 })
 
 export const Roadmap = mongoose.model('Roadmap', roadmapSchema);

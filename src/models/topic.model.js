@@ -36,7 +36,13 @@ const topicSchema = new mongoose.Schema({
         required: true,
         enum: ['locked', 'current', 'completed'],
     },
-    resources: [resourceSchema]
+    resources: [resourceSchema],
+    // Latest quiz score (0-100) — feeds the adaptive roadmap
+    quizScore: {
+        type: Number,
+        min: 0,
+        max: 100
+    }
 })
 
 export const Topic = mongoose.model('Topic', topicSchema);

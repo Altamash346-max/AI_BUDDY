@@ -1,0 +1,1308 @@
+{
+  "meta": {
+    "started": "2026-10-25 21:48:13",
+    "finished": "2026-10-25 21:53:20"
+  },
+  "E1": [
+    {
+      "endpoint": "POST /users/login",
+      "median_ms": 180.7,
+      "p95_ms": 245.3,
+      "kb": 0.7,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /users/me",
+      "median_ms": 34.6,
+      "p95_ms": 45.6,
+      "kb": 0.2,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /roadmap/me",
+      "median_ms": 72.3,
+      "p95_ms": 112.6,
+      "kb": 0.5,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /roadmap/:id",
+      "median_ms": 90.9,
+      "p95_ms": 122.4,
+      "kb": 5.0,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /progress/stats",
+      "median_ms": 69.9,
+      "p95_ms": 91.7,
+      "kb": 0.1,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /progress/roadmap/:id",
+      "median_ms": 138.0,
+      "p95_ms": 196.8,
+      "kb": 5.3,
+      "n": 30
+    },
+    {
+      "endpoint": "GET /interview/profile",
+      "median_ms": 66.0,
+      "p95_ms": 82.3,
+      "kb": 1.7,
+      "n": 30
+    }
+  ],
+  "E2_generate": [
+    {
+      "subject": "Database Management Systems",
+      "status": 201,
+      "ms": 4199,
+      "roadmap_id": "6ade2bdfc9795ac3167b35b6",
+      "topics": 8,
+      "topics_in_8_10": true,
+      "resources_per_topic": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "all_topics_2_3_resources": true,
+      "types_valid": true,
+      "titles": [
+        "Advanced SQL & Joins",
+        "Indexing & B-Trees",
+        "Query Optimization",
+        "Transactions & ACID",
+        "Concurrency Control & Locking",
+        "Normalization",
+        "NoSQL Databases",
+        "System Design & Sharding"
+      ],
+      "urls": [
+        "https://leetcode.com/problemset/database/",
+        "https://www.sqlservertutorial.net/sql-server-sql-joins/",
+        "https://use-the-index-luke.com/",
+        "https://www.youtube.com/watch?v=aZjYr87r1FE",
+        "https://www.postgresql.org/docs/current/performance-tips.html",
+        "https://www.youtube.com/watch?v=HbePPjjzxb8",
+        "https://www.geeksforgeeks.org/acit-properties-in-dbms/",
+        "https://www.coursera.org/learn/database-management",
+        "https://www.youtube.com/watch?v=DJ12rT9uKYg",
+        "https://www.javatpoint.com/dbms-two-phase-locking-protocol",
+        "https://www.guru99.com/database-normalization.html",
+        "https://www.youtube.com/watch?v=UrYLYV7WSHM",
+        "https://university.mongodb.com/",
+        "https://www.youtube.com/watch?v=ZS_kXvCBMDo",
+        "https://www.digitalocean.com/community/tutorials/understanding-database-sharding",
+        "https://www.youtube.com/watch?v=owIdjYNw5e8"
+      ]
+    },
+    {
+      "subject": "Operating Systems",
+      "status": 201,
+      "ms": 7427,
+      "roadmap_id": "6ade2be6c9795ac3167b35cf",
+      "topics": 9,
+      "topics_in_8_10": true,
+      "resources_per_topic": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "all_topics_2_3_resources": true,
+      "types_valid": true,
+      "titles": [
+        "Processes and Threads",
+        "CPU Scheduling",
+        "Process Synchronization",
+        "Deadlocks",
+        "Memory Management",
+        "Virtual Memory",
+        "File Systems",
+        "Disk Scheduling",
+        "OS Interview Practice"
+      ],
+      "urls": [
+        "https://www.coursera.org/learn/os-power-user",
+        "https://www.geeksforgeeks.org/difference-between-process-and-thread/",
+        "https://www.youtube.com/watch?v=EWkNsOGKuZs",
+        "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf",
+        "https://www.youtube.com/watch?v=Qqx_wzMmFeA",
+        "https://greenteapress.com/wp/semaphores/",
+        "https://www.geeksforgeeks.org/introduction-of-deadlock-in-operating-system/",
+        "https://www.youtube.com/watch?v=za-tsmv_GIg",
+        "https://www.youtube.com/watch?v=UlsBwZz_vVA",
+        "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-intro.pdf",
+        "https://www.geeksforgeeks.org/page-replacement-algorithms-in-operating-systems/",
+        "https://www.youtube.com/watch?v=yl_A9gjq3pY",
+        "https://www.youtube.com/watch?v=KN8YgjnBMFs",
+        "https://pages.cs.wisc.edu/~remzi/OSTEP/file-systems.pdf",
+        "https://www.geeksforgeeks.org/disk-scheduling-algorithms/",
+        "https://www.youtube.com/watch?v=if99d7VwV8A",
+        "https://www.interviewbit.com/os-interview-questions/",
+        "https://www.youtube.com/watch?v=mPqqptVu_EY"
+      ]
+    },
+    {
+      "subject": "Computer Networks",
+      "status": 201,
+      "ms": 4289,
+      "roadmap_id": "6ade2bebc9795ac3167b35eb",
+      "topics": 9,
+      "topics_in_8_10": true,
+      "resources_per_topic": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "all_topics_2_3_resources": true,
+      "types_valid": true,
+      "titles": [
+        "TCP/IP & OSI Models",
+        "Application Layer Protocols",
+        "Transport Layer (TCP vs UDP)",
+        "Congestion & Flow Control",
+        "Network Layer & IP Addressing",
+        "Routing Algorithms & Protocols",
+        "Data Link Layer & MAC",
+        "Network Security (TLS/SSL, IPSec)",
+        "Socket Programming & Interview Prep"
+      ],
+      "urls": [
+        "https://www.youtube.com/watch?v=IPvYjXCsTg8",
+        "https://www.geeksforgeeks.org/tcp-ip-model/",
+        "https://gaia.cs.umass.edu/kurose_ross/online_lectures.htm",
+        "https://www.cloudflare.com/learning/dns/what-is-dns/",
+        "https://www.geeksforgeeks.org/tcp-3-way-handshake-process/",
+        "https://nptel.ac.in/courses/106105183",
+        "https://www.youtube.com/watch?v=iy49_XajwTM",
+        "https://www.geeksforgeeks.org/flow-control-vs-congestion-control/",
+        "https://www.youtube.com/watch?v=wknZXwAZ4QM",
+        "https://www.freecodecamp.org/news/subnetting-mastering-ip-addressing-cidr/",
+        "https://www.geeksforgeeks.org/distance-vector-routing-vs-link-state-routing/",
+        "https://www.youtube.com/watch?v=7_W0KrfnBtE",
+        "https://www.geeksforgeeks.org/error-detection-in-computer-networks/",
+        "https://www.youtube.com/watch?v=55Z84eQNCY0",
+        "https://www.cloudflare.com/learning/ssl/what-is-a-tls-handshake/",
+        "https://www.coursera.org/learn/computer-security",
+        "https://realpython.com/python-sockets/",
+        "https://www.geeksforgeeks.org/computer-network-interview-questions/"
+      ]
+    },
+    {
+      "subject": "Object-Oriented Programming in Java",
+      "status": 201,
+      "ms": 5311,
+      "roadmap_id": "6ade2bf0c9795ac3167b3607",
+      "topics": 10,
+      "topics_in_8_10": true,
+      "resources_per_topic": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "all_topics_2_3_resources": true,
+      "types_valid": true,
+      "titles": [
+        "Classes and Objects",
+        "Constructors and Memory",
+        "Encapsulation",
+        "Inheritance",
+        "Polymorphism",
+        "Abstraction and Interfaces",
+        "Exception Handling",
+        "SOLID Principles",
+        "OOP Design Patterns",
+        "Low-Level Design Practice"
+      ],
+      "urls": [
+        "https://docs.oracle.com/javase/tutorial/java/javaOO/",
+        "https://www.youtube.com/watch?v=GoXwIVyNvX0",
+        "https://www.geeksforgeeks.org/constructors-in-java/",
+        "https://www.youtube.com/watch?v=2s2-b7q9gCE",
+        "https://www.w3schools.com/java/java_encapsulation.asp",
+        "https://www.youtube.com/watch?v=ab0tsyDwJWg",
+        "https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html",
+        "https://www.youtube.com/watch?v=0Yeo7ioq1qQ",
+        "https://www.baeldung.com/java-polymorphism",
+        "https://www.youtube.com/watch?v=8omq8y_2jKs",
+        "https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html",
+        "https://www.youtube.com/watch?v=ZfA3g-nZ04k",
+        "https://www.baeldung.com/java-exceptions",
+        "https://www.youtube.com/watch?v=1XAfZujqQcY",
+        "https://www.digitalocean.com/community/conceptual-articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design",
+        "https://www.youtube.com/watch?v=TMggxzSTFV8",
+        "https://refactoring.guru/design-patterns/java",
+        "https://www.youtube.com/watch?v=ccWptwP4jXA",
+        "https://leetcode.com/",
+        "https://workat.tech/"
+      ]
+    },
+    {
+      "subject": "System Design Basics",
+      "status": 201,
+      "ms": 4132,
+      "roadmap_id": "6ade2bf4c9795ac3167b3626",
+      "topics": 9,
+      "topics_in_8_10": true,
+      "resources_per_topic": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "all_topics_2_3_resources": true,
+      "types_valid": true,
+      "titles": [
+        "Scalability Basics",
+        "Load Balancers",
+        "Caching Strategies",
+        "Databases & Sharding",
+        "CAP Theorem",
+        "Asynchronous Processing & Message Queues",
+        "CDNs & Storage",
+        "Microservices & API Design",
+        "Mock Interviews & Case Studies"
+      ],
+      "urls": [
+        "https://github.com/donnemartin/system-design-primer#scalability",
+        "https://www.youtube.com/watch?v=-W9F__D3oY4",
+        "https://www.cloudflare.com/learning/performance/what-is-a-load-balancer/",
+        "https://www.youtube.com/watch?v=u91hAzCmqso",
+        "https://aws.amazon.com/caching/",
+        "https://www.youtube.com/watch?v=jgpVdJB2sKQ",
+        "https://www.digitalocean.com/community/tutorials/understanding-database-sharding",
+        "https://www.youtube.com/watch?v=ZS_kXvCBMDo",
+        "https://www.quora.com/What-is-CAP-theorem-1",
+        "https://www.youtube.com/watch?v=kqpPYIMluAE",
+        "https://www.confluent.io/learn/apache-kafka-vs-rabbitmq/",
+        "https://www.youtube.com/watch?v=oUJbuFjxfsk",
+        "https://www.cloudflare.com/learning/cdn/what-is-a-cdn/",
+        "https://www.ibm.com/topics/object-storage-vs-block-storage",
+        "https://microservices.io/patterns/microservices.html",
+        "https://www.youtube.com/watch?v=y2niYHOlKVI",
+        "https://bytebytego.com/",
+        "https://www.youtube.com/watch?v=fDSBsKWsngx"
+      ]
+    }
+  ],
+  "E2_quiz": [
+    {
+      "topic": "Query Optimization",
+      "status": 201,
+      "ms": 2527,
+      "questions": 5
+    },
+    {
+      "topic": "Process Synchronization",
+      "status": 201,
+      "ms": 1772,
+      "questions": 5
+    },
+    {
+      "topic": "Transport Layer (TCP vs UDP)",
+      "status": 201,
+      "ms": 1412,
+      "questions": 5
+    },
+    {
+      "topic": "Encapsulation",
+      "status": 201,
+      "ms": 1660,
+      "questions": 5
+    },
+    {
+      "topic": "Caching Strategies",
+      "status": 201,
+      "ms": 5330,
+      "questions": 5
+    }
+  ],
+  "E3_weak": [
+    {
+      "subject": "Database Management Systems",
+      "weak_topic": "Query Optimization",
+      "weak_score": 0,
+      "status": 200,
+      "ms": 3197,
+      "completed_preserved": true,
+      "completed_orders": [
+        1,
+        2
+      ],
+      "current_count": 1,
+      "first_remaining_is_current": true,
+      "remaining_count": 6,
+      "remaining_in_3_10": true,
+      "revision_topics": [
+        "Query Optimization Revision & Practice"
+      ],
+      "revision_present": true,
+      "new_titles": [
+        "Query Optimization Revision & Practice",
+        "Transactions & ACID Properties",
+        "Concurrency Control & Locking",
+        "Database Normalization",
+        "NoSQL Databases",
+        "System Design & Sharding"
+      ],
+      "summary": "We adjusted your roadmap to prioritize Query Optimization since your quiz score was low, followed by core database internals and system design for placements."
+    },
+    {
+      "subject": "Operating Systems",
+      "weak_topic": "Process Synchronization",
+      "weak_score": 0,
+      "status": 200,
+      "ms": 3294,
+      "completed_preserved": true,
+      "completed_orders": [
+        1,
+        2
+      ],
+      "current_count": 1,
+      "first_remaining_is_current": true,
+      "remaining_count": 7,
+      "remaining_in_3_10": true,
+      "revision_topics": [
+        "Process Synchronization Revision & Practice",
+        "Process Synchronization Deep Dive"
+      ],
+      "revision_present": true,
+      "new_titles": [
+        "Process Synchronization Revision & Practice",
+        "Process Synchronization Deep Dive",
+        "Deadlocks",
+        "Memory Management",
+        "Virtual Memory",
+        "File Systems and Disk Scheduling",
+        "OS Interview Practice"
+      ],
+      "summary": "Since you struggled with Process Synchronization (0% quiz), we have added a targeted revision session for it early in your roadmap, followed by your remaining OS topics."
+    },
+    {
+      "subject": "Computer Networks",
+      "weak_topic": "Transport Layer (TCP vs UDP)",
+      "weak_score": 0,
+      "status": 200,
+      "ms": 3525,
+      "completed_preserved": true,
+      "completed_orders": [
+        1,
+        2
+      ],
+      "current_count": 1,
+      "first_remaining_is_current": true,
+      "remaining_count": 7,
+      "remaining_in_3_10": true,
+      "revision_topics": [
+        "Transport Layer Review & Practice (TCP vs UDP)",
+        "Network Layer & IP Addressing",
+        "Data Link Layer & MAC"
+      ],
+      "revision_present": true,
+      "new_titles": [
+        "Transport Layer Review & Practice (TCP vs UDP)",
+        "Congestion & Flow Control",
+        "Network Layer & IP Addressing",
+        "Routing Algorithms & Protocols",
+        "Data Link Layer & MAC",
+        "Network Security (TLS/SSL, IPSec)",
+        "Socket Programming & Interview Prep"
+      ],
+      "summary": "Since you scored 0% on the Transport Layer quiz, we have added a dedicated review session for Transport Layer fundamentals early in your remaining roadmap before moving on to Congestion & Flow Control and the rest of the network stack."
+    },
+    {
+      "subject": "Object-Oriented Programming in Java",
+      "weak_topic": "Encapsulation",
+      "weak_score": 0,
+      "status": 200,
+      "ms": 3217,
+      "completed_preserved": true,
+      "completed_orders": [
+        1,
+        2
+      ],
+      "current_count": 1,
+      "first_remaining_is_current": true,
+      "remaining_count": 7,
+      "remaining_in_3_10": true,
+      "revision_topics": [
+        "Encapsulation Revision and Practice"
+      ],
+      "revision_present": true,
+      "new_titles": [
+        "Encapsulation Revision and Practice",
+        "Inheritance",
+        "Polymorphism",
+        "Abstraction and Interfaces",
+        "Exception Handling",
+        "SOLID Principles",
+        "OOP Design Patterns and Low-Level Design Practice"
+      ],
+      "summary": "We have added a targeted revision module for Encapsulation at the beginning of your roadmap to address your recent quiz score, followed by the remaining core OOP and design principles for your placement goal."
+    },
+    {
+      "subject": "System Design Basics",
+      "weak_topic": "Caching Strategies",
+      "weak_score": 0,
+      "status": 200,
+      "ms": 3402,
+      "completed_preserved": true,
+      "completed_orders": [
+        1,
+        2
+      ],
+      "current_count": 1,
+      "first_remaining_is_current": true,
+      "remaining_count": 7,
+      "remaining_in_3_10": true,
+      "revision_topics": [
+        "Caching Strategies Revision & Practice"
+      ],
+      "revision_present": true,
+      "new_titles": [
+        "Caching Strategies Revision & Practice",
+        "Databases & Sharding",
+        "CAP Theorem",
+        "Asynchronous Processing & Message Queues",
+        "CDNs & Storage",
+        "Microservices & API Design",
+        "Mock Interviews & Case Studies"
+      ],
+      "summary": "Since you scored 0% on Caching Strategies, we have added a dedicated review session for it right at the beginning, followed by your remaining core system design topics."
+    }
+  ],
+  "E3_instruction": [
+    {
+      "subject": "Database Management Systems",
+      "status": 200,
+      "ms": 2509,
+      "remaining_before": 6,
+      "remaining_after": 4,
+      "completed_preserved": true,
+      "summary": "Adjusted the roadmap to fit your new 1-hour daily schedule by filtering down to the 4 most crucial topics for placements, focusing on Transactions, Concurrency, Normalization, and System Design."
+    },
+    {
+      "subject": "Operating Systems",
+      "status": 200,
+      "ms": 2610,
+      "remaining_before": 7,
+      "remaining_after": 5,
+      "completed_preserved": true,
+      "summary": "Your roadmap has been streamlined to fit your new 1-hour daily limit by focusing strictly on the highest-priority interview topics."
+    },
+    {
+      "subject": "Computer Networks",
+      "status": 200,
+      "ms": 2664,
+      "remaining_before": 7,
+      "remaining_after": 4,
+      "completed_preserved": true,
+      "summary": "Your daily study time has been reduced to 1 hour, so the roadmap has been streamlined to focus on the 4 most critical Computer Networks topics for placement interviews."
+    },
+    {
+      "subject": "Object-Oriented Programming in Java",
+      "status": 200,
+      "ms": 12489,
+      "remaining_before": 7,
+      "remaining_after": 5,
+      "completed_preserved": true,
+      "summary": "To accommodate your reduced schedule of 1 hour per day, your roadmap has been streamlined to focus strictly on essential core concepts and high-yield interview topics for placements."
+    },
+    {
+      "subject": "System Design Basics",
+      "status": 200,
+      "ms": 2469,
+      "remaining_before": 7,
+      "remaining_after": 5,
+      "completed_preserved": true,
+      "summary": "Your daily available time has been reduced to 1 hour, and we have removed lower-priority items to focus exclusively on the core system design topics essential for placement."
+    }
+  ],
+  "E2_chat": [
+    {
+      "question": "What is the difference between a process and a thread?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 1900,
+      "reply_words": 219,
+      "mentions_current_topic": false
+    },
+    {
+      "question": "Explain normalization up to 3NF with a short example.",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 1927,
+      "reply_words": 235,
+      "mentions_current_topic": false
+    },
+    {
+      "question": "How does a hash map handle collisions?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 2024,
+      "reply_words": 230,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "What is the time complexity of binary search and why?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 2343,
+      "reply_words": 245,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "How should I answer 'Tell me about yourself' in a placement interview?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 2061,
+      "reply_words": 243,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "What is a deadlock and what are its four necessary conditions?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 2054,
+      "reply_words": 254,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "Explain the difference between TCP and UDP.",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 1863,
+      "reply_words": 217,
+      "mentions_current_topic": false
+    },
+    {
+      "question": "What is polymorphism in object-oriented programming?",
+      "with_topic_context": false,
+      "status": 200,
+      "ms": 1741,
+      "reply_words": 209,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "I scored low on my last quiz. What should I revise first?",
+      "with_topic_context": true,
+      "status": 200,
+      "ms": 1938,
+      "reply_words": 214,
+      "mentions_current_topic": true
+    },
+    {
+      "question": "Can you explain the current topic on my roadmap in simple terms?",
+      "with_topic_context": true,
+      "status": 200,
+      "ms": 1860,
+      "reply_words": 234,
+      "mentions_current_topic": true
+    }
+  ],
+  "E2_interview": [
+    {
+      "company": "Amazon",
+      "role": "SDE-1 (Backend)",
+      "status": 201,
+      "ms": 3682,
+      "counts": {
+        "technical": 6,
+        "projectBased": 4,
+        "behavioral": 4,
+        "culturalFit": 4
+      },
+      "project_questions": [
+        "In your Campus Canteen App, you used JWT for authentication. Walk me through your token generation, storage, and validation lifecycle. How do you handle token expiration and secure logout?",
+        "For your Expense Tracker hosted on Render, what potential cold-start or performance bottlenecks did you encounter, and how did you optimize your Node.js backend to handle them?",
+        "In the Movie Review Sentiment project built with Python and scikit-learn, what feature extraction techniques (like TF-IDF or CountVectorizer) did you use, and how did you evaluate model performance?",
+        "During your internship at Example Labs building admin dashboard pages in React, how did you structure your API integration layer with the backend, and how did you manage global state or caching?"
+      ]
+    },
+    {
+      "company": "TCS",
+      "role": "Digital Systems Engineer",
+      "status": 201,
+      "ms": 2965,
+      "counts": {
+        "technical": 6,
+        "projectBased": 4,
+        "behavioral": 4,
+        "culturalFit": 4
+      },
+      "project_questions": [
+        "In your Campus Canteen App, how did you implement JWT-based authentication, and where did you securely store the tokens on the client side?",
+        "For your Expense Tracker hosted on Render, how did you handle CORS policies and environment variable management between the React frontend and Node.js backend?",
+        "In the Movie Review Sentiment project using Python and scikit-learn, what text preprocessing and feature extraction techniques did you apply before feeding data into the machine learning model?",
+        "During your internship at Example Labs building admin dashboard pages in React, how did you handle state management and component re-rendering optimizations for complex data tables?"
+      ]
+    },
+    {
+      "company": "Infosys",
+      "role": "Specialist Programmer",
+      "status": 201,
+      "ms": 40723,
+      "counts": {
+        "technical": 6,
+        "projectBased": 4,
+        "behavioral": 4,
+        "culturalFit": 4
+      },
+      "project_questions": [
+        "In your Campus Canteen App, how did you implement role-based authorization using JWTs across both Express middleware and React protected routes?",
+        "For the Expense Tracker deployed on Render, how did you design the REST API endpoints to support efficient pagination and filtering of expenses by date range?",
+        "In your Movie Review Sentiment project, what text pre-processing steps did you perform, and which evaluation metrics beyond accuracy did you use to assess the scikit-learn model?",
+        "During your internship at Example Labs while building admin dashboard pages in React, how did you manage dynamic state and handle API network errors gracefully?"
+      ]
+    }
+  ],
+  "E4": [
+    {
+      "url": "https://aws.amazon.com/caching/",
+      "host": "aws.amazon.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://bytebytego.com/",
+      "host": "bytebytego.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html",
+      "host": "docs.oracle.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html",
+      "host": "docs.oracle.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/",
+      "host": "docs.oracle.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://gaia.cs.umass.edu/kurose_ross/online_lectures.htm",
+      "host": "gaia.cs.umass.edu",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://github.com/donnemartin/system-design-primer#scalability",
+      "host": "github.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://greenteapress.com/wp/semaphores/",
+      "host": "greenteapress.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://leetcode.com/",
+      "host": "leetcode.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://leetcode.com/problemset/database/",
+      "host": "leetcode.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://microservices.io/patterns/microservices.html",
+      "host": "microservices.io",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://nptel.ac.in/courses/106105183",
+      "host": "nptel.ac.in",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf",
+      "host": "pages.cs.wisc.edu",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/file-systems.pdf",
+      "host": "pages.cs.wisc.edu",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-intro.pdf",
+      "host": "pages.cs.wisc.edu",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://realpython.com/python-sockets/",
+      "host": "realpython.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://refactoring.guru/design-patterns/java",
+      "host": "refactoring.guru",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://university.mongodb.com/",
+      "host": "university.mongodb.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://use-the-index-luke.com/",
+      "host": "use-the-index-luke.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://workat.tech/",
+      "host": "workat.tech",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.baeldung.com/java-exceptions",
+      "host": "baeldung.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.baeldung.com/java-polymorphism",
+      "host": "baeldung.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.cloudflare.com/learning/cdn/what-is-a-cdn/",
+      "host": "cloudflare.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://www.cloudflare.com/learning/dns/what-is-dns/",
+      "host": "cloudflare.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://www.cloudflare.com/learning/performance/what-is-a-load-balancer/",
+      "host": "cloudflare.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://www.cloudflare.com/learning/ssl/what-is-a-tls-handshake/",
+      "host": "cloudflare.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://www.confluent.io/learn/apache-kafka-vs-rabbitmq/",
+      "host": "confluent.io",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.coursera.org/learn/computer-security",
+      "host": "coursera.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.coursera.org/learn/database-management",
+      "host": "coursera.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.coursera.org/learn/os-power-user",
+      "host": "coursera.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.digitalocean.com/community/conceptual-articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design",
+      "host": "digitalocean.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.digitalocean.com/community/tutorials/understanding-database-sharding",
+      "host": "digitalocean.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.freecodecamp.org/news/subnetting-mastering-ip-addressing-cidr/",
+      "host": "freecodecamp.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/acit-properties-in-dbms/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/computer-network-interview-questions/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/constructors-in-java/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/difference-between-process-and-thread/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/disk-scheduling-algorithms/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/distance-vector-routing-vs-link-state-routing/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/error-detection-in-computer-networks/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/flow-control-vs-congestion-control/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/introduction-of-deadlock-in-operating-system/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/page-replacement-algorithms-in-operating-systems/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/tcp-3-way-handshake-process/",
+      "host": "geeksforgeeks.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.geeksforgeeks.org/tcp-ip-model/",
+      "host": "geeksforgeeks.org",
+      "status": null,
+      "class": "error",
+      "error": "ReadTimeout"
+    },
+    {
+      "url": "https://www.guru99.com/database-normalization.html",
+      "host": "guru99.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.ibm.com/topics/object-storage-vs-block-storage",
+      "host": "ibm.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.interviewbit.com/os-interview-questions/",
+      "host": "interviewbit.com",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.javatpoint.com/dbms-two-phase-locking-protocol",
+      "host": "javatpoint.com",
+      "status": null,
+      "class": "error",
+      "error": "ConnectionError"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/performance-tips.html",
+      "host": "postgresql.org",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.quora.com/What-is-CAP-theorem-1",
+      "host": "quora.com",
+      "method": "GET",
+      "status": 403,
+      "class": "blocked"
+    },
+    {
+      "url": "https://www.sqlservertutorial.net/sql-server-sql-joins/",
+      "host": "sqlservertutorial.net",
+      "method": "GET",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.w3schools.com/java/java_encapsulation.asp",
+      "host": "w3schools.com",
+      "method": "GET",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=-W9F__D3oY4",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=0Yeo7ioq1qQ",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=1XAfZujqQcY",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=2s2-b7q9gCE",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=55Z84eQNCY0",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=7_W0KrfnBtE",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=8omq8y_2jKs",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=DJ12rT9uKYg",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=EWkNsOGKuZs",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=GoXwIVyNvX0",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=HbePPjjzxb8",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=IPvYjXCsTg8",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=KN8YgjnBMFs",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=Qqx_wzMmFeA",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=TMggxzSTFV8",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=UlsBwZz_vVA",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=UrYLYV7WSHM",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ZS_kXvCBMDo",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ZfA3g-nZ04k",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=aZjYr87r1FE",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ab0tsyDwJWg",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=ccWptwP4jXA",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=fDSBsKWsngx",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 400,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=if99d7VwV8A",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=iy49_XajwTM",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=jgpVdJB2sKQ",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 200,
+      "class": "reachable"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=kqpPYIMluAE",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=mPqqptVu_EY",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=oUJbuFjxfsk",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=owIdjYNw5e8",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=u91hAzCmqso",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=wknZXwAZ4QM",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=y2niYHOlKVI",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=yl_A9gjq3pY",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=za-tsmv_GIg",
+      "host": "youtube.com",
+      "method": "youtube-oembed",
+      "status": 404,
+      "class": "not_found"
+    }
+  ]
+}

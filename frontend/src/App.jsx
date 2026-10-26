@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import Sidebar from './components/Sidebar'
+import ChatWidget from './components/ChatWidget'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
@@ -50,20 +52,23 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      <ChatWidget key={user._id} />
     </div>
   )
 }
 
 export default function App() {
   return (
-    <>
-      <div className="bg-animated">
-        <div className="bg-orb" />
-      </div>
-      <div className="bg-grid" />
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </>
+    <ThemeProvider>
+      <>
+        <div className="bg-animated">
+          <div className="bg-orb" />
+        </div>
+        <div className="bg-grid" />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </>
+    </ThemeProvider>
   )
 }

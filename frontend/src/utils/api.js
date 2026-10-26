@@ -23,7 +23,10 @@ api.interceptors.response.use(
         await axios.post('/api/users/refresh-token', {}, { withCredentials: true })
         return api(original)
       } catch {
-        window.location.href = '/login'
+        // Avoid a reload loop when already on an auth page
+        if (!['/login', '/signup'].includes(window.location.pathname)) {
+          window.location.href = '/login'
+        }
       }
     }
     return Promise.reject(error)

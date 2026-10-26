@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import toast from 'react-hot-toast'
 import {
   LayoutDashboard, Map, Brain, BookOpen, MessageSquare, User, TrendingUp,
-  LogOut, Zap, ChevronRight
+  LogOut, Zap, ChevronRight, Sun, Moon, Square, RectangleHorizontal
 } from 'lucide-react'
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
 
 export default function Sidebar() {
   const { user, logout } = useAuth()
+  const { colorMode, shapeMode, toggleColorMode, toggleShapeMode } = useTheme()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -91,6 +93,28 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
+        {/* Theme Controls */}
+        <div className="theme-controls">
+          <button
+            id="btn-toggle-color-mode"
+            className="theme-btn"
+            onClick={toggleColorMode}
+            title={colorMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {colorMode === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            <span>{colorMode === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
+          <button
+            id="btn-toggle-shape-mode"
+            className="theme-btn"
+            onClick={toggleShapeMode}
+            title={shapeMode === 'rounded' ? 'Switch to Sharp Edges' : 'Switch to Rounded Edges'}
+          >
+            {shapeMode === 'rounded' ? <Square size={15} /> : <RectangleHorizontal size={15} />}
+            <span>{shapeMode === 'rounded' ? 'Sharp' : 'Round'}</span>
+          </button>
+        </div>
+
         <div className="user-card" onClick={() => navigate('/profile')}>
           <div className="user-avatar">{initials}</div>
           <div className="user-info">

@@ -14,6 +14,7 @@ export default function QuizPage() {
   const [score, setScore] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loadingTopics, setLoadingTopics] = useState(false)
+  const [results, setResults] = useState(null) // server-graded results
 
   useEffect(() => {
     api.get('/roadmap/me').then(r => setRoadmaps(r.data?.data || [])).catch(() => {})
@@ -53,25 +54,23 @@ export default function QuizPage() {
     setAnswers(a => ({ ...a, [qi]: optIdx }))
   }
 
-  const handleSubmit = () => {
-    if (!quiz) return
+  const handleSubmit = async () => {
+    if (!quiz || !selectedTopic) return
     const questions = quiz.questions || []
-    let correct = 0
-    questions.forEach((q, i) => {
-      if (answers[i] === q.correctOptionIndex) correct++
-    })
-    setScore(correct)
-    setSubmitted(true)
-
-    // Save result
-    if (quiz._id || selectedTopic) {
-      const tid = selectedTopic
-      api.post(`/quiz/${tid}/submit`, { answers, score: correct, total: questions.length }).catch(() => {})
+    const answersArray = questions.map((_, i) => answers[i] ?? -1)
+    try {
+      const res = await api.post(`/quiz/${selectedTopic}/submit`, { answers: answersArray })
+      const data = res.data?.data
+      setScore(data?.correctCount ?? 0)
+      setResults(data?.results ?? null)
+      setSubmitted(true)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit quiz')
     }
   }
 
   const handleReset = () => {
-    setQuiz(null); setAnswers({}); setSubmitted(false); setScore(0)
+    setQuiz(null); setAnswers({}); setSubmitted(false); setScore(0); setResults(null)
   }
 
   const questions = quiz?.questions || []
@@ -185,17 +184,19 @@ export default function QuizPage() {
               </div>
               <div className="quiz-options">
                 {q.options.map((opt, oi) => {
+                  // After submission, use server-graded results for correct/wrong display
+                  const correctIdx = submitted && results ? results[qi]?.correctOptionIndex : undefined
                   let cls = 'quiz-option'
                   if (submitted) {
-                    if (oi === q.correctOptionIndex) cls += ' correct'
-                    else if (answers[qi] === oi && oi !== q.correctOptionIndex) cls += ' wrong'
+                    if (oi === correctIdx) cls += ' correct'
+                    else if (answers[qi] === oi && oi !== correctIdx) cls += ' wrong'
                   } else if (answers[qi] === oi) cls += ' selected'
                   return (
                     <button key={oi} className={cls} onClick={() => handleAnswer(qi, oi)}>
                       <span style={{ marginRight: 8, opacity: 0.6 }}>{['A', 'B', 'C', 'D'][oi]}.</span>
                       {opt}
-                      {submitted && oi === q.correctOptionIndex && <CheckCircle size={16} style={{ marginLeft: 'auto', flexShrink: 0 }} />}
-                      {submitted && answers[qi] === oi && oi !== q.correctOptionIndex && <XCircle size={16} style={{ marginLeft: 'auto', flexShrink: 0 }} />}
+                      {submitted && oi === correctIdx && <CheckCircle size={16} style={{ marginLeft: 'auto', flexShrink: 0 }} />}
+                      {submitted && answers[qi] === oi && oi !== correctIdx && <XCircle size={16} style={{ marginLeft: 'auto', flexShrink: 0 }} />}
                     </button>
                   )
                 })}

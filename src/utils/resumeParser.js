@@ -1,11 +1,5 @@
-import { createRequire } from "module";
+import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
-
-// pdf-parse is CommonJS and doesn't play nicely with `import pdfParse from "pdf-parse"`
-// under "type": "module" — Node throws "does not provide an export named 'default'".
-// Using createRequire sidesteps the broken interop entirely.
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
 
 /**
  * Extracts raw text from an uploaded resume/LinkedIn PDF or DOCX buffer.
@@ -14,8 +8,14 @@ const pdfParse = require("pdf-parse");
  */
 export const extractTextFromBuffer = async (buffer, mimetype) => {
     if (mimetype === "application/pdf") {
-        const data = await pdfParse(buffer);
-        return data.text;
+        // pdf-parse v2 exposes a class instead of the v1 function
+        const parser = new PDFParse({ data: buffer });
+        try {
+            const result = await parser.getText();
+            return result.text;
+        } finally {
+            await parser.destroy();
+        }
     }
 
     if (mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {

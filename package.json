@@ -24,6 +24,7 @@
   },
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "npm install --prefix frontend --include=dev && npm run build --prefix frontend"
   }
 }

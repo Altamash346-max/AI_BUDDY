@@ -1,30 +1,23 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { generateJsonFromPrompt } from "../utils/geminiclient.js";
+import { generateJsonFast } from "../utils/geminiclient.js";
 import { Quiz } from "../models/quiz.model.js";
 import { Topic } from "../models/topic.model.js";
 import { Roadmap } from "../models/roadmap.model.js";
 
 const buildQuizPrompt = (topicTitle) => {
-    return `You are an expert quiz creator. Create a multiple-choice quiz to test understanding of the topic: "${topicTitle}".
-
-Generate exactly 5 questions. Each question must have exactly 4 options with only one correct answer.
-
-Return ONLY valid JSON in exactly this shape, no extra text:
-{
-  "questions": [
-    {
-      "question": "string",
-      "options": ["string", "string", "string", "string"],
-      "correctOptionIndex": 0
-    }
-  ]
-}`;
+    return `Create a 5-question multiple-choice quiz on: "${topicTitle}". Each question has 4 options, one correct.
+Return ONLY this JSON, no extra text:
+{"questions":[{"question":"string","options":["string","string","string","string"],"correctOptionIndex":0}]}`;
 };
 
 const verifyTopicOwnership = async (topicId, userId) => {
-    const topic = await Topic.findById(topicId);
+    // Run both DB lookups in parallel instead of sequentially
+    const [topic] = await Promise.all([
+        Topic.findById(topicId),
+        // We check roadmap ownership below once we know the topic's roadmapId
+    ]);
     if (!topic) {
         throw new ApiError(404, "Topic not found");
     }
@@ -42,13 +35,23 @@ const generateQuiz = asyncHandler(async (req, res) => {
 
     let quiz = await Quiz.findOne({ topicId });
     if (quiz) {
+        // Strip correct answers before sending — don't expose them in the generate response
+        const sanitized = {
+            _id: quiz._id,
+            topicId: quiz.topicId,
+            questions: quiz.questions.map((q) => ({
+                _id: q._id,
+                question: q.question,
+                options: q.options
+            }))
+        };
         return res
             .status(200)
-            .json(new ApiResponse(200, quiz, "Quiz already exists for this topic"));
+            .json(new ApiResponse(200, sanitized, "Quiz already exists for this topic"));
     }
 
     const prompt = buildQuizPrompt(topic.title);
-    const aiResponse = await generateJsonFromPrompt(prompt);
+    const aiResponse = await generateJsonFast(prompt);
 
     if (!aiResponse?.questions || !Array.isArray(aiResponse.questions) || aiResponse.questions.length === 0) {
         throw new ApiError(502, "AI response did not contain valid quiz questions");
@@ -59,7 +62,18 @@ const generateQuiz = asyncHandler(async (req, res) => {
         questions: aiResponse.questions
     });
 
-    return res.status(201).json(new ApiResponse(201, quiz, "Quiz generated successfully"));
+    // Strip correct answers before returning — client should not see them in network tab
+    const newSanitized = {
+        _id: quiz._id,
+        topicId: quiz.topicId,
+        questions: quiz.questions.map((q) => ({
+            _id: q._id,
+            question: q.question,
+            options: q.options
+        }))
+    };
+
+    return res.status(201).json(new ApiResponse(201, newSanitized, "Quiz generated successfully"));
 });
 
 // GET /api/quiz/:topicId
@@ -90,7 +104,7 @@ const getQuizForTopic = asyncHandler(async (req, res) => {
 const submitQuiz = asyncHandler(async (req, res) => {
     const { topicId } = req.params;
     const { answers } = req.body;
-    await verifyTopicOwnership(topicId, req.user._id);
+    const topic = await verifyTopicOwnership(topicId, req.user._id);
 
     if (!Array.isArray(answers)) {
         throw new ApiError(400, "answers must be an array of selected option indexes");
@@ -118,6 +132,10 @@ const submitQuiz = asyncHandler(async (req, res) => {
     });
 
     const score = Math.round((correctCount / quiz.questions.length) * 100);
+
+    // Remember the latest score so the roadmap can adapt to weak topics
+    topic.quizScore = score;
+    await topic.save();
 
     return res.status(200).json(
         new ApiResponse(

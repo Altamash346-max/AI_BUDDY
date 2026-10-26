@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { Map, Plus, ChevronDown, ChevronUp, ExternalLink, Trash2, Zap, BookOpen, Video, FileText, Code, Layers } from 'lucide-react'
+import { Map, Plus, ChevronDown, ChevronUp, ExternalLink, Trash2, Zap, BookOpen, Video, FileText, Code, Layers, MessageCircle, WandSparkles, TriangleAlert, History } from 'lucide-react'
+import { askBuddy } from '../components/ChatWidget'
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
-const GOALS = ['Placement', 'College Exam', 'Competitive Exam', 'Skill Building', 'Project Development', 'Career Switch']
+const GOALS = ['Placement', 'College Exams', 'Hackathon', 'Research', 'Freelancing']
 const TIME_OPTIONS = ['1 hour/day', '2 hours/day', '3 hours/day', '4+ hours/day']
+const WEAK_SCORE = 60
+const ADAPT_CHIPS = ['I have less time now', 'Add more practice problems', 'Focus on interview questions', 'Go a bit deeper']
 
 const RESOURCE_ICONS = {
   video: { icon: Video, color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
@@ -18,7 +21,7 @@ const RESOURCE_ICONS = {
 
 function TopicCard({ topic, index, onMarkDone }) {
   const [open, setOpen] = useState(false)
-  const isDone = topic.completed
+  const isDone = topic.status === 'completed'
 
   return (
     <div className={`roadmap-topic${isDone ? ' completed' : ''} fade-in`}>
@@ -28,9 +31,18 @@ function TopicCard({ topic, index, onMarkDone }) {
         </div>
         <span className="topic-title">{topic.title}</span>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {topic.quizScore != null && (
+            <span className={`badge ${topic.quizScore < WEAK_SCORE ? 'badge-rose' : 'badge-emerald'}`} style={{ fontSize: 11 }}>Quiz {topic.quizScore}%</span>
+          )}
           {topic.resources?.length > 0 && (
             <span className="badge badge-purple" style={{ fontSize: 11 }}>{topic.resources.length} resources</span>
           )}
+          <button
+            className="btn btn-sm btn-ghost"
+            style={{ fontSize: 11, padding: '5px 10px' }}
+            onClick={(e) => { e.stopPropagation(); askBuddy({ topicId: topic._id, topicTitle: topic.title }) }}
+            aria-label={`Ask AI Buddy about ${topic.title}`}
+          ><MessageCircle size={13} /> Ask</button>
           {!isDone && (
             <button
               className="btn btn-sm"
@@ -71,6 +83,9 @@ export default function RoadmapPage() {
   const [topics, setTopics] = useState([])
   const [view, setView] = useState('list') // 'list' | 'generate' | 'detail'
   const [fetchingTopics, setFetchingTopics] = useState(false)
+  const [adaptOpen, setAdaptOpen] = useState(false)
+  const [adaptText, setAdaptText] = useState('')
+  const [adapting, setAdapting] = useState(false)
 
   useEffect(() => { fetchRoadmaps() }, [])
 
@@ -106,17 +121,37 @@ export default function RoadmapPage() {
       // Backend /:roadmapId returns { roadmap, topics } together
       const res = await api.get(`/roadmap/${roadmap._id}`)
       const data = res.data?.data
+      if (data?.roadmap) setActiveRoadmap(data.roadmap)
       if (data?.topics) setTopics(data.topics)
       else setTopics([])
     } catch { setTopics([]) }
     finally { setFetchingTopics(false) }
   }
 
+  const handleAdapt = async (instruction = '') => {
+    if (!activeRoadmap || adapting) return
+    setAdapting(true)
+    try {
+      const res = await api.post(`/roadmap/${activeRoadmap._id}/adapt`, { instruction })
+      const data = res.data?.data
+      if (data?.topics) setTopics(data.topics)
+      if (data?.roadmap) setActiveRoadmap(data.roadmap)
+      setAdaptOpen(false)
+      setAdaptText('')
+      toast.success('Roadmap updated for you')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Could not adapt the roadmap')
+    } finally {
+      setAdapting(false)
+    }
+  }
+
   const handleMarkDone = async (topicId) => {
     try {
       // Backend: POST /progress/complete with { topicId } in body
       await api.post('/progress/complete', { topicId })
-      setTopics(ts => ts.map(t => t._id === topicId ? { ...t, completed: true } : t))
+      // Topic model uses status field, not a boolean 'completed'
+      setTopics(ts => ts.map(t => t._id === topicId ? { ...t, status: 'completed' } : t))
       toast.success('Topic marked as completed! 🎉')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update progress')
@@ -135,7 +170,9 @@ export default function RoadmapPage() {
     } catch { toast.error('Failed to remove') }
   }
 
-  const completedCount = topics.filter(t => t.completed).length
+  const weakTopics = topics.filter(t => t.quizScore != null && t.quizScore < WEAK_SCORE)
+  const lastAdaptation = activeRoadmap?.adaptations?.at(-1)
+  const completedCount = topics.filter(t => t.status === 'completed').length
   const progressPct = topics.length > 0 ? Math.round((completedCount / topics.length) * 100) : 0
 
   return (
@@ -289,7 +326,61 @@ export default function RoadmapPage() {
             <div className="progress-bar" style={{ marginTop: 16 }}>
               <div className="progress-fill" style={{ width: `${progressPct}%` }} />
             </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="btn btn-secondary btn-sm" onClick={() => setAdaptOpen(o => !o)} disabled={adapting}>
+                <WandSparkles size={14} /> Adapt roadmap
+              </button>
+            </div>
           </div>
+
+          {weakTopics.length > 0 && !adaptOpen && (
+            <div className="adapt-banner fade-in">
+              <TriangleAlert size={18} />
+              <span style={{ flex: 1 }}>
+                You scored below {WEAK_SCORE}% on <strong>{weakTopics.map(t => t.title).join(', ')}</strong>. Adapt your roadmap to add revision before moving on?
+              </span>
+              <button className="btn btn-primary btn-sm" onClick={() => handleAdapt('')} disabled={adapting}>
+                {adapting ? 'Adapting…' : 'Add revision'}
+              </button>
+            </div>
+          )}
+
+          {adaptOpen && (
+            <div className="card card-p fade-in" style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Change your roadmap</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
+                Completed topics stay as they are. The remaining topics are rebuilt from your progress, quiz scores and your note.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {ADAPT_CHIPS.map(c => (
+                  <button key={c} type="button" className="btn btn-ghost btn-sm" style={{ fontSize: 12 }} onClick={() => setAdaptText(c)}>{c}</button>
+                ))}
+              </div>
+              <label htmlFor="adapt-note" className="form-label">What should change? (optional)</label>
+              <textarea
+                id="adapt-note"
+                className="form-textarea"
+                style={{ minHeight: 70 }}
+                maxLength={300}
+                placeholder="e.g. Add system design basics, I only have 1 hour a day now…"
+                value={adaptText}
+                onChange={e => setAdaptText(e.target.value)}
+              />
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+                <button className="btn btn-ghost btn-sm" onClick={() => setAdaptOpen(false)} disabled={adapting}>Cancel</button>
+                <button className="btn btn-primary btn-sm" onClick={() => handleAdapt(adaptText.trim())} disabled={adapting}>
+                  <WandSparkles size={14} /> {adapting ? 'Updating roadmap…' : 'Update roadmap'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {lastAdaptation && (
+            <div className="adapt-note fade-in">
+              <History size={15} />
+              <span><strong>Last update:</strong> {lastAdaptation.summary}</span>
+            </div>
+          )}
 
           {fetchingTopics ? (
             <div className="ai-loader"><div className="ai-orbs"><div className="ai-orb" /><div className="ai-orb" /><div className="ai-orb" /></div><p className="ai-loader-text">Loading topics...</p></div>
